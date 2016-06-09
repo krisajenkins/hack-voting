@@ -1,0 +1,12 @@
+{
+    "votes": {
+        ".read": true,
+        "$uid": {
+            ".write": "$uid === auth.uid"
+        }
+    },
+    "projects": {
+        ".read": true,
+        ".write": false
+    }
+}
