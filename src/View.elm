@@ -1,7 +1,7 @@
 module View exposing (root)
 
 import Exts.RemoteData exposing (..)
-import Firebase.Ports as Firebase
+import Firebase.Vote as Firebase
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -17,6 +17,17 @@ root model =
             , disabled (model.auth /= NotAsked)
             ]
             [ text "Log In" ]
+        , button
+            [ class "btn btn-primary"
+            , onClick ToggleListen
+            ]
+            [ text
+                (if model.listening then
+                    "Silence"
+                 else
+                    "Listen"
+                )
+            ]
         , button
             [ class "btn btn-success"
             , onClick Increment

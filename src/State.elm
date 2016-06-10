@@ -1,7 +1,8 @@
 module State exposing (..)
 
 import Exts.RemoteData exposing (..)
-import Firebase.Ports as Firebase
+import Firebase.Auth as Firebase
+import Firebase.Vote as Firebase
 import Types exposing (..)
 
 
@@ -9,6 +10,7 @@ initialState : ( Model, Cmd Msg )
 initialState =
     ( { auth = Loading
       , counter = 0
+      , listening = True
       , votes = []
       , voteError = Nothing
       }
@@ -20,28 +22,25 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Sub.map AuthResponse Firebase.authResponse
-        , Firebase.listenToVotes Heard
-        , Firebase.voteError VoteError
+        , Firebase.votes HeardVotes
+        , Firebase.voteSendError VoteError
         ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case Debug.log "update" msg of
+    case msg of
         Authenticate ->
             ( { model | auth = Loading }
             , Firebase.authenticate ()
             )
 
         AuthResponse response ->
-            ( { model | auth = response }
-            , case response of
-                Success user ->
-                    Firebase.watch ()
-
-                _ ->
-                    Cmd.none
-            )
+            let
+                newModel =
+                    { model | auth = response }
+            in
+                ( newModel, listenCmd newModel )
 
         Increment ->
             let
@@ -51,8 +50,8 @@ update msg model =
                 ( newModel
                 , case newModel.auth of
                     Success user ->
-                        Firebase.vote
-                            ( user
+                        Firebase.voteSend
+                            ( user.uid
                             , { counter = newModel.counter }
                             )
 
@@ -65,7 +64,29 @@ update msg model =
             , Cmd.none
             )
 
-        Heard n ->
-            ( { model | votes = n }
+        HeardVotes votes ->
+            ( { model | votes = votes }
             , Cmd.none
             )
+
+        ToggleListen ->
+            let
+                newModel =
+                    { model | listening = not model.listening }
+            in
+                ( newModel
+                , listenCmd newModel
+                )
+
+
+listenCmd : Model -> Cmd msg
+listenCmd model =
+    if model.listening then
+        case model.auth of
+            Success user ->
+                Firebase.votesListen ()
+
+            _ ->
+                Firebase.votesSilence ()
+    else
+        Firebase.votesSilence ()
