@@ -1,0 +1,30 @@
+* Firebase commands
+#+BEGIN_SRC sh
+$ npm install -g firebase-tools
+$ firebase login
+$ elm build
+$ cd dist
+$ firebase serve
+...
+$ firebase deploy
+$ firebase open hosting:site
+#+END_SRC
+
+https://console.firebase.google.com/
+
+voting-e6be5.firebaseio.com
+
+* Links
+
+[[https://firebase.google.com/docs/cli/][Firebase CLI]]
+[[https://firebase.google.com/docs/reference/js/][Firebase API]]
+[[https://firebase.google.com/docs/database/web/retrieve-data][Firebase Get]]
+[[https://console.firebase.google.com/project/voting-e6be5/database/data][Firebase view]]
+[[https://firebase.google.com/docs/database/security/][Database Rules]]
+* Design
+
+There's a list of projects. You can add to it. Admin can delete. They
+have names and descriptions.
+
+There's a list of votes, keyed by username. It lists your top three
+votes.
