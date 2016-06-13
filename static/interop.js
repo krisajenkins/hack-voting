@@ -28,8 +28,30 @@
     }, 1);
 
 
+    // Event.
+    var eventPath = firebase.database().ref('/events/alpha');
+
+    app.ports.eventListen.subscribe(function () {
+        console.log('LISTENING', eventPath.toString());
+        eventPath.on(
+            'value',
+            function(snapshot) {
+                var rawValue = snapshot.val();
+                console.log('HEARD', rawValue);
+
+                app.ports.event.send(JSON.stringify(rawValue));
+            },
+            app.ports.eventError.send
+        );
+    });
+
+    app.ports.eventSilence.subscribe(function () {
+        console.log('SILENCING', eventPath.toString());
+        eventPath.off('value');
+    });
+
     // Voting.
-    var votePath = firebase.database().ref('/votes');
+    var votePath = eventPath.child('votes');
 
     app.ports.voteSend.subscribe(function (msg) {
         var uid = msg[0],
@@ -38,25 +60,5 @@
 
         path.set(vote)
             .catch(app.ports.voteSendError.send);
-    });
-
-    app.ports.votesListen.subscribe(function () {
-        votePath.on('value', function(snapshot) {
-            var rawValue, key, pairs = [];
-
-            rawValue = snapshot.val();
-
-            for (key in rawValue) {
-                if (rawValue.hasOwnProperty(key)) {
-                    pairs.push([key, rawValue[key]]);
-                }
-            }
-
-            app.ports.votes.send(pairs);
-        });
-    });
-
-    app.ports.votesSilence.subscribe(function () {
-        votePath.off('value');
     });
 }());

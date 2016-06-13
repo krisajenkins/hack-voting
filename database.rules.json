@@ -1,12 +1,15 @@
 {
-    "votes": {
+    "events": {
         ".read": true,
-        "$uid": {
-            ".write": "$uid === auth.uid"
+        ".write": false,
+        "alpha": {
+            "votes": {
+                "$uid": {
+                    ".write": "$uid === auth.uid"
+                }
+            },
+            "projects": {
+            }
         }
-    },
-    "projects": {
-        ".read": true,
-        ".write": false
     }
 }

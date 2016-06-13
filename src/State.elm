@@ -1,17 +1,20 @@
 module State exposing (..)
 
-import Exts.RemoteData exposing (..)
+import Dict
+import Exts.RemoteData as RemoteData exposing (..)
 import Firebase.Auth as Firebase
-import Firebase.Vote as Firebase
+import Firebase.Event as Firebase
+import Json.Decode as Decode
+import Rest
 import Types exposing (..)
 
 
 initialState : ( Model, Cmd Msg )
 initialState =
     ( { auth = Loading
-      , counter = 0
       , listening = True
-      , votes = []
+      , event = Loading
+      , eventError = Nothing
       , voteError = Nothing
       }
     , Cmd.none
@@ -22,7 +25,8 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ Sub.map AuthResponse Firebase.authResponse
-        , Firebase.votes HeardVotes
+        , Firebase.event (Decode.decodeString Rest.decodeEvent >> HeardEvent)
+        , Firebase.eventError EventError
         , Firebase.voteSendError VoteError
         ]
 
@@ -42,30 +46,18 @@ update msg model =
             in
                 ( newModel, listenCmd newModel )
 
-        Increment ->
-            let
-                newModel =
-                    { model | counter = model.counter + 1 }
-            in
-                ( newModel
-                , case newModel.auth of
-                    Success user ->
-                        Firebase.voteSend
-                            ( user.uid
-                            , { counter = newModel.counter }
-                            )
-
-                    _ ->
-                        Cmd.none
-                )
-
         VoteError err ->
             ( { model | voteError = Just err }
             , Cmd.none
             )
 
-        HeardVotes votes ->
-            ( { model | votes = votes }
+        HeardEvent response ->
+            ( { model | event = RemoteData.fromResult response }
+            , Cmd.none
+            )
+
+        EventError error ->
+            ( { model | eventError = Just error }
             , Cmd.none
             )
 
@@ -78,15 +70,49 @@ update msg model =
                 , listenCmd newModel
                 )
 
+        VoteFor projectId n ->
+            case model.auth of
+                Success user ->
+                    case model.event of
+                        Success event ->
+                            let
+                                oldVote =
+                                    Dict.get user.uid event.votes
+                                        |> Maybe.withDefault Firebase.initialVote
+
+                                newVote =
+                                    case n of
+                                        1 ->
+                                            { oldVote | first = Just projectId }
+
+                                        2 ->
+                                            { oldVote | second = Just projectId }
+
+                                        3 ->
+                                            { oldVote | third = Just projectId }
+
+                                        _ ->
+                                            oldVote
+                            in
+                                ( model
+                                , Firebase.voteSend ( user.uid, newVote )
+                                )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 listenCmd : Model -> Cmd msg
 listenCmd model =
     if model.listening then
         case model.auth of
             Success user ->
-                Firebase.votesListen ()
+                Firebase.eventListen ()
 
             _ ->
-                Firebase.votesSilence ()
+                Firebase.eventSilence ()
     else
-        Firebase.votesSilence ()
+        Firebase.eventSilence ()
