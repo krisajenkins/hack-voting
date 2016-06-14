@@ -18,7 +18,7 @@ root model =
             , button
                 [ class "btn btn-primary pull-right"
                 , onClick Authenticate
-                , disabled (model.auth /= NotAsked)
+                , disabled (canAuthenticate model)
                 ]
                 [ text "Log In" ]
             , case model.auth of
@@ -41,3 +41,19 @@ root model =
                     h2 [] [ text "Log in to view and vote." ]
             ]
         ]
+
+
+canAuthenticate : Model -> Bool
+canAuthenticate model =
+    case model.auth of
+        Loading ->
+            True
+
+        Success _ ->
+            True
+
+        NotAsked ->
+            False
+
+        Failure _ ->
+            False
