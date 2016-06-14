@@ -34,17 +34,25 @@ type Priority
     | Third
 
 
-voteN : Priority -> Vote -> Maybe ProjectId
-voteN priority =
+priorities : List Priority
+priorities =
+    [ First
+    , Second
+    , Third
+    ]
+
+
+voteN : Vote -> Priority -> Maybe ProjectId
+voteN vote priority =
     case priority of
         First ->
-            .first
+            vote.first
 
         Second ->
-            .second
+            vote.second
 
         Third ->
-            .third
+            vote.third
 
 
 type alias Model =
@@ -58,4 +66,4 @@ type Msg
     = HeardEvent (Result String Event)
     | EventError Firebase.Error
     | VoteError Firebase.Error
-    | VoteFor Priority ProjectId
+    | VoteFor Priority (Maybe ProjectId)

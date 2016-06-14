@@ -12,29 +12,31 @@ import Types exposing (..)
 
 root : Model -> Html Msg
 root model =
-    container
-        [ button
-            [ class "btn btn-primary"
-            , onClick Authenticate
-            , disabled (model.auth /= NotAsked)
+    div []
+        [ container
+            [ button
+                [ class "btn btn-primary"
+                , onClick Authenticate
+                , disabled (model.auth /= NotAsked)
+                ]
+                [ text "Log In" ]
+            , case model.auth of
+                Success user ->
+                    case model.eventModel of
+                        Nothing ->
+                            text "Initialising."
+
+                        Just eventModel ->
+                            Event.View.root user eventModel
+                                |> Html.map EventMsg
+
+                Failure err ->
+                    div [ class "alert alert-danger" ] [ text err.message ]
+
+                Loading ->
+                    text "Loading."
+
+                NotAsked ->
+                    text "Initialising."
             ]
-            [ text "Log In" ]
-        , case model.auth of
-            Success user ->
-                case model.eventModel of
-                    Nothing ->
-                        text "Initialising."
-
-                    Just eventModel ->
-                        Event.View.root user eventModel
-                            |> Html.map EventMsg
-
-            Failure err ->
-                div [ class "alert alert-danger" ] [ text err.message ]
-
-            Loading ->
-                text "Loading."
-
-            NotAsked ->
-                text "Initialising."
         ]

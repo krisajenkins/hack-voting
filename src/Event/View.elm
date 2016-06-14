@@ -3,6 +3,7 @@ module Event.View exposing (root)
 import Dict exposing (Dict)
 import Event.State exposing (..)
 import Event.Types exposing (..)
+import Exts.Html.Bootstrap exposing (..)
 import Exts.RemoteData exposing (..)
 import Firebase.Auth exposing (User)
 import Html exposing (..)
@@ -33,12 +34,27 @@ eventView user event =
             Dict.get user.uid event.votes
                 |> Maybe.withDefault initialVote
     in
-        div [ class "row" ]
-            [ div [ class "col-xs-12 col-sm-6" ]
-                [ votesView event ]
-            , div [ class "col-xs-12 col-sm-6" ]
-                [ projectsView userVote event.projects ]
+        div []
+            [ yourVote userVote
+            , row
+                [ div [ class "col-xs-12 col-sm-6" ]
+                    [ votesView event ]
+                , div [ class "col-xs-12 col-sm-6" ]
+                    [ projectsView userVote event.projects ]
+                ]
             ]
+
+
+yourVote : Vote -> Html msg
+yourVote userVote =
+    h3 []
+        [ case (List.map (voteN userVote) priorities) of
+            (Just _) :: (Just _) :: (Just _) :: [] ->
+                text "Thanks for voting."
+
+            _ ->
+                text "Please use your remaining votes."
+        ]
 
 
 projectsView : Vote -> Dict String Project -> Html Msg
@@ -86,7 +102,7 @@ voteButtons userVote projectId =
         ordButton priority =
             let
                 active =
-                    case voteN priority userVote of
+                    case voteN userVote priority of
                         Nothing ->
                             False
 
@@ -99,15 +115,19 @@ voteButtons userVote projectId =
                         , ( "btn-default", not active )
                         , ( "btn-info", active )
                         ]
-                    , onClick (VoteFor priority projectId)
+                    , onClick
+                        (VoteFor priority
+                            (if active then
+                                Nothing
+                             else
+                                Just projectId
+                            )
+                        )
                     ]
                     [ priorityString priority ]
     in
         div [ class "btn-group" ]
-            [ ordButton First
-            , ordButton Second
-            , ordButton Third
-            ]
+            (List.map ordButton priorities)
 
 
 tally : Dict String Vote -> Dict ProjectId Int
@@ -118,12 +138,14 @@ tally =
     in
         Dict.foldl
             (\_ vote acc ->
-                case vote.first of
-                    Nothing ->
-                        acc
-
-                    Just projectId ->
-                        Dict.update projectId increment acc
+                List.foldl
+                    (\accessor ->
+                        voteN vote accessor
+                            |> Maybe.map (flip Dict.update increment)
+                            |> Maybe.withDefault identity
+                    )
+                    acc
+                    priorities
             )
             Dict.empty
 
@@ -142,10 +164,11 @@ votesView event =
     in
         div []
             [ h1 [] [ text "Votes" ]
-            , div []
+            , well
                 (tally event.votes
                     |> Dict.toList
                     |> List.map (voteBar event.projects maxCount)
+                    |> List.intersperse (hr [] [])
                 )
             ]
 
@@ -168,18 +191,24 @@ voteBar projects maxCount ( projectId, voteCount ) =
         pct n =
             toString n ++ "%"
     in
-        div
-            [ style
-                [ ( "width", pct width )
-                , ( "margin", "15px 0" )
-                , ( "padding", "10px" )
-                , ( "background-color", "aliceblue" )
-                , ( "transition", "width 200ms" )
+        div []
+            [ h4 []
+                [ text name
+                , text " "
+                , badge voteCount
                 ]
-            ]
-            [ badge voteCount
-            , text " "
-            , text name
+            , div
+                [ style
+                    [ ( "width", pct width )
+                    , ( "margin", "15px 0" )
+                    , ( "padding", "10px" )
+                    , ( "background-color", "#3DF236" )
+                    , ( "border", "solid 2px #28A024" )
+                    , ( "border-radius", "10px" )
+                    , ( "transition", "width 200ms" )
+                    ]
+                ]
+                []
             ]
 
 

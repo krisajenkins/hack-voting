@@ -65,13 +65,13 @@ update user msg model =
                         newVote =
                             case priority of
                                 First ->
-                                    { oldVote | first = Just projectId }
+                                    { oldVote | first = projectId }
 
                                 Second ->
-                                    { oldVote | second = Just projectId }
+                                    { oldVote | second = projectId }
 
                                 Third ->
-                                    { oldVote | third = Just projectId }
+                                    { oldVote | third = projectId }
                     in
                         ( model
                         , voteSend ( user.uid, newVote )
