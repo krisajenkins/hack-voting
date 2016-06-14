@@ -21,10 +21,10 @@ root user model =
             div [ class "alert alert-danger" ] [ text err ]
 
         Loading ->
-            p [] [ text "Waiting for event data..." ]
+            h2 [] [ i [] [ text "Waiting for event data..." ] ]
 
         NotAsked ->
-            p [] [ text "Initialising." ]
+            h2 [] [ text "Initialising." ]
 
 
 eventView : User -> Event -> Html Msg
@@ -38,9 +38,9 @@ eventView user event =
             [ yourVote userVote
             , row
                 [ div [ class "col-xs-12 col-sm-6" ]
-                    [ votesView event ]
-                , div [ class "col-xs-12 col-sm-6" ]
                     [ projectsView userVote event.projects ]
+                , div [ class "col-xs-12 col-sm-6" ]
+                    [ votesView event ]
                 ]
             ]
 
@@ -50,7 +50,7 @@ yourVote userVote =
     h3 []
         [ case (List.map (voteN userVote) priorities) of
             (Just _) :: (Just _) :: (Just _) :: [] ->
-                text "Thanks for voting."
+                text "Thanks for voting!"
 
             _ ->
                 text "Please use your remaining votes."
@@ -60,7 +60,7 @@ yourVote userVote =
 projectsView : Vote -> Dict String Project -> Html Msg
 projectsView userVote projects =
     div []
-        [ h1 [] [ text "Projects" ]
+        [ h2 [] [ text "Projects" ]
         , div [ class "list-group" ]
             (projects
                 |> Dict.toList
@@ -161,15 +161,21 @@ votesView event =
                 |> Dict.values
                 |> List.maximum
                 |> Maybe.withDefault 0
+
+        tallied =
+            tally event.votes
+                |> Dict.toList
     in
         div []
-            [ h1 [] [ text "Votes" ]
-            , well
-                (tally event.votes
-                    |> Dict.toList
-                    |> List.map (voteBar event.projects maxCount)
-                    |> List.intersperse (hr [] [])
-                )
+            [ h2 [] [ text "Votes" ]
+            , if List.isEmpty tallied then
+                empty
+              else
+                well
+                    (tallied
+                        |> List.map (voteBar event.projects maxCount)
+                        |> List.intersperse (hr [] [])
+                    )
             ]
 
 
@@ -185,14 +191,14 @@ voteBar projects maxCount ( projectId, voteCount ) =
                     project.name
 
         width =
-            (toFloat voteCount / (toFloat maxCount + 5))
+            (toFloat voteCount / toFloat maxCount)
                 * 100.0
 
         pct n =
             toString n ++ "%"
     in
         div []
-            [ h4 []
+            [ h3 []
                 [ text name
                 , text " "
                 , badge voteCount

@@ -14,8 +14,9 @@ root : Model -> Html Msg
 root model =
     div []
         [ container
-            [ button
-                [ class "btn btn-primary"
+            [ h1 [] [ text "Vote-o-matic" ]
+            , button
+                [ class "btn btn-primary pull-right"
                 , onClick Authenticate
                 , disabled (model.auth /= NotAsked)
                 ]
@@ -34,9 +35,9 @@ root model =
                     div [ class "alert alert-danger" ] [ text err.message ]
 
                 Loading ->
-                    text "Loading."
+                    h2 [] [ i [] [ text "Checking your account." ] ]
 
                 NotAsked ->
-                    text "Initialising."
+                    h2 [] [ text "Log in to view and vote." ]
             ]
         ]
