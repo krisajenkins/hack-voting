@@ -35,9 +35,9 @@ eventView user event =
     in
         div [ class "row" ]
             [ div [ class "col-xs-12 col-sm-6" ]
-                [ projectsView userVote event.projects ]
+                [ votesView event ]
             , div [ class "col-xs-12 col-sm-6" ]
-                [ votesView event.votes ]
+                [ projectsView userVote event.projects ]
             ]
 
 
@@ -110,21 +110,79 @@ voteButtons userVote projectId =
             ]
 
 
-votesView : Dict String Vote -> Html msg
-votesView votes =
-    div []
-        [ h1 [] [ text "Votes" ]
-        , div [ class "list-group" ]
-            (votes
-                |> Dict.toList
-                |> List.map voteView
+tally : Dict String Vote -> Dict ProjectId Int
+tally =
+    let
+        increment =
+            Just << (+) 1 << Maybe.withDefault 0
+    in
+        Dict.foldl
+            (\_ vote acc ->
+                case vote.first of
+                    Nothing ->
+                        acc
+
+                    Just projectId ->
+                        Dict.update projectId increment acc
             )
-        ]
+            Dict.empty
 
 
-voteView : ( String, Vote ) -> Html msg
-voteView ( id, vote ) =
-    div [ class "list-group-item" ]
-        [ h3 [] [ text id ]
-        , div [] [ code [] [ text (toString vote) ] ]
-        ]
+votesView : Event -> Html msg
+votesView event =
+    let
+        voteCounts =
+            tally event.votes
+
+        maxCount =
+            voteCounts
+                |> Dict.values
+                |> List.maximum
+                |> Maybe.withDefault 0
+    in
+        div []
+            [ h1 [] [ text "Votes" ]
+            , div []
+                (tally event.votes
+                    |> Dict.toList
+                    |> List.map (voteBar event.projects maxCount)
+                )
+            ]
+
+
+voteBar : Dict ProjectId Project -> Int -> ( ProjectId, Int ) -> Html msg
+voteBar projects maxCount ( projectId, voteCount ) =
+    let
+        name =
+            case Dict.get projectId projects of
+                Nothing ->
+                    projectId
+
+                Just project ->
+                    project.name
+
+        width =
+            (toFloat voteCount / (toFloat maxCount + 5))
+                * 100.0
+
+        pct n =
+            toString n ++ "%"
+    in
+        div
+            [ style
+                [ ( "width", pct width )
+                , ( "margin", "15px 0" )
+                , ( "padding", "10px" )
+                , ( "background-color", "aliceblue" )
+                , ( "transition", "width 200ms" )
+                ]
+            ]
+            [ badge voteCount
+            , text " "
+            , text name
+            ]
+
+
+badge : Int -> Html msg
+badge n =
+    span [ class "badge" ] [ text (toString n) ]
