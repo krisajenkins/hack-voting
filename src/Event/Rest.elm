@@ -1,8 +1,8 @@
-module Rest exposing (..)
+module Event.Rest exposing (..)
 
 import Dict
 import Exts.Maybe
-import Firebase.Event exposing (..)
+import Event.Types exposing (..)
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode exposing (null)
