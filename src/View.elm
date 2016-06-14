@@ -1,6 +1,7 @@
 module View exposing (root)
 
 import Event.View
+import Exts.Html.Bootstrap exposing (..)
 import Exts.RemoteData exposing (..)
 import Html exposing (..)
 import Html.App as Html
@@ -11,7 +12,7 @@ import Types exposing (..)
 
 root : Model -> Html Msg
 root model =
-    div []
+    container
         [ button
             [ class "btn btn-primary"
             , onClick Authenticate
