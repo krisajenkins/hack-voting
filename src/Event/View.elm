@@ -63,13 +63,30 @@ projectView userVote ( id, project ) =
         ]
 
 
+priorityString : Priority -> Html msg
+priorityString priority =
+    let
+        builder n suffix =
+            span [] [ text n, sup [] [ text suffix ] ]
+    in
+        case priority of
+            First ->
+                builder "1" "st"
+
+            Second ->
+                builder "2" "nd"
+
+            Third ->
+                builder "3" "rd"
+
+
 voteButtons : Vote -> ProjectId -> Html Msg
 voteButtons userVote projectId =
     let
-        ordButton n suffix accessor =
+        ordButton priority =
             let
                 active =
-                    case accessor userVote of
+                    case voteN priority userVote of
                         Nothing ->
                             False
 
@@ -82,16 +99,14 @@ voteButtons userVote projectId =
                         , ( "btn-default", not active )
                         , ( "btn-info", active )
                         ]
-                    , onClick (VoteFor projectId n)
+                    , onClick (VoteFor priority projectId)
                     ]
-                    [ text (toString n)
-                    , sup [] [ text suffix ]
-                    ]
+                    [ priorityString priority ]
     in
         div [ class "btn-group" ]
-            [ ordButton 1 "st" .first
-            , ordButton 2 "nd" .second
-            , ordButton 3 "rd" .third
+            [ ordButton First
+            , ordButton Second
+            , ordButton Third
             ]
 
 

@@ -28,6 +28,25 @@ type alias Vote =
     }
 
 
+type Priority
+    = First
+    | Second
+    | Third
+
+
+voteN : Priority -> Vote -> Maybe ProjectId
+voteN priority =
+    case priority of
+        First ->
+            .first
+
+        Second ->
+            .second
+
+        Third ->
+            .third
+
+
 type alias Model =
     { event : RemoteData String Event
     , eventError : Maybe Firebase.Error
@@ -39,4 +58,4 @@ type Msg
     = HeardEvent (Result String Event)
     | EventError Firebase.Error
     | VoteError Firebase.Error
-    | VoteFor ProjectId Int
+    | VoteFor Priority ProjectId

@@ -54,7 +54,7 @@ update user msg model =
             , Cmd.none
             )
 
-        VoteFor projectId n ->
+        VoteFor priority projectId ->
             case model.event of
                 Success event ->
                     let
@@ -63,18 +63,15 @@ update user msg model =
                                 |> Maybe.withDefault initialVote
 
                         newVote =
-                            case n of
-                                1 ->
+                            case priority of
+                                First ->
                                     { oldVote | first = Just projectId }
 
-                                2 ->
+                                Second ->
                                     { oldVote | second = Just projectId }
 
-                                3 ->
+                                Third ->
                                     { oldVote | third = Just projectId }
-
-                                _ ->
-                                    oldVote
                     in
                         ( model
                         , voteSend ( user.uid, newVote )
