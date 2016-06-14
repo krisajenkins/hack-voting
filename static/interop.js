@@ -1,16 +1,11 @@
-/*global Elm, firebase */
+/*global Elm, firebase, firebaseConfig */
 
 (function () {
     // Start the Elm App.
     var app = Elm.App.fullscreen();
 
     // Initialize Firebase
-    var firebaseApp = firebase.initializeApp({
-        apiKey: 'AIzaSyBG5-dI_sIjAC5KyQn5UEL9CLrhXwuiwgA',
-        authDomain: 'voting-e6be5.firebaseapp.com',
-        databaseURL: 'https://voting-e6be5.firebaseio.com',
-        storageBucket: ''
-    });
+    var firebaseApp = firebase.initializeApp(firebaseConfig);
 
     // Firebase Auth.
     app.ports.authenticate.subscribe(function () {
