@@ -12,7 +12,13 @@ type Msg
     | EventMsg Event.Types.Msg
 
 
+type View
+    = ProjectVotes
+    | NotFound
+
+
 type alias Model =
     { auth : RemoteData Firebase.Error Firebase.User
     , eventModel : Maybe Event.Types.Model
+    , view : View
     }

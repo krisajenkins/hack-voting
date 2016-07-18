@@ -7,10 +7,11 @@ import Response exposing (..)
 import Types exposing (..)
 
 
-initialState : ( Model, Cmd Msg )
-initialState =
+initialState : View -> Response Model Msg
+initialState initialView =
     ( { auth = Loading
       , eventModel = Nothing
+      , view = initialView
       }
     , Cmd.none
     )
@@ -26,7 +27,7 @@ subscriptions model =
         ]
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Response Model Msg
 update msg model =
     case msg of
         Authenticate ->
@@ -52,3 +53,8 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
+
+
+urlUpdate : View -> Model -> Response Model Msg
+urlUpdate view model =
+    ( { model | view = view }, Cmd.none )

@@ -33,11 +33,14 @@ root model =
         , container
             [ case model.auth of
                 Success user ->
-                    case model.eventModel of
-                        Nothing ->
+                    case ( model.view, model.eventModel ) of
+                        ( NotFound, _ ) ->
+                            h2 [] [ text "404 -Not Found" ]
+
+                        ( ProjectVotes, Nothing ) ->
                             text "Initialising."
 
-                        Just eventModel ->
+                        ( ProjectVotes, Just eventModel ) ->
                             Event.View.root user eventModel
                                 |> Html.map EventMsg
 

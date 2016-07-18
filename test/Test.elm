@@ -6,13 +6,16 @@ module Test exposing (main)
 -}
 
 import ElmTest exposing (..)
+import RoutingTests
 import StateTest
 
 
 tests : Test
 tests =
     suite "All"
-        [ StateTest.tests ]
+        [ StateTest.tests
+        , RoutingTests.tests
+        ]
 
 
 {-| Run the test suite under node.

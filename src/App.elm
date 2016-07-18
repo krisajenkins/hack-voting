@@ -5,7 +5,8 @@ module App exposing (main)
 @docs main
 -}
 
-import Html.App
+import Navigation
+import Routing
 import State
 import View
 
@@ -14,9 +15,10 @@ import View
 -}
 main : Program Never
 main =
-    Html.App.program
+    Navigation.program (Navigation.makeParser (.hash >> Routing.hashParser))
         { init = State.initialState
-        , subscriptions = State.subscriptions
         , update = State.update
+        , urlUpdate = State.urlUpdate
+        , subscriptions = State.subscriptions
         , view = View.root
         }
