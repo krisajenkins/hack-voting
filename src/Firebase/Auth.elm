@@ -8,8 +8,8 @@ port module Firebase.Auth
         )
 
 import Exts.Maybe exposing (..)
-import Exts.RemoteData exposing (..)
 import Firebase.Common exposing (..)
+import RemoteData exposing (..)
 
 
 type alias Email =

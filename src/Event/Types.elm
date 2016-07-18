@@ -1,9 +1,9 @@
 module Event.Types exposing (..)
 
 import Dict exposing (Dict)
-import Exts.RemoteData exposing (..)
 import Firebase.Auth as Firebase
 import Firebase.Common as Firebase
+import RemoteData exposing (..)
 
 
 type alias ProjectId =

@@ -5,12 +5,12 @@ import Event.State exposing (..)
 import Event.Types exposing (..)
 import Exts.Html.Bootstrap exposing (..)
 import Exts.Maybe exposing (maybe)
-import Exts.RemoteData exposing (..)
 import Firebase.Auth exposing (User)
 import Firebase.Common as Firebase
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import RemoteData exposing (..)
 
 
 root : User -> Model -> Html Msg

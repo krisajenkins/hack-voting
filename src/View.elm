@@ -2,11 +2,11 @@ module View exposing (root)
 
 import Event.View
 import Exts.Html.Bootstrap exposing (..)
-import Exts.RemoteData exposing (..)
 import Html exposing (..)
 import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import RemoteData exposing (..)
 import Types exposing (..)
 
 

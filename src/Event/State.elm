@@ -4,9 +4,9 @@ import Dict
 import Event.Ports exposing (..)
 import Event.Rest exposing (..)
 import Event.Types exposing (..)
-import Exts.RemoteData as RemoteData exposing (..)
 import Firebase.Auth exposing (User)
 import Json.Decode as Decode
+import RemoteData as RemoteData exposing (..)
 
 
 initialVote : Vote

@@ -1,9 +1,9 @@
 module Types exposing (..)
 
 import Event.Types
-import Exts.RemoteData exposing (..)
 import Firebase.Auth as Firebase
 import Firebase.Common as Firebase
+import RemoteData exposing (..)
 
 
 type Msg

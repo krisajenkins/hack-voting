@@ -1,8 +1,8 @@
 module State exposing (..)
 
 import Event.State as Event
-import Exts.RemoteData as RemoteData exposing (..)
 import Firebase.Auth as Firebase
+import RemoteData as RemoteData exposing (..)
 import Response exposing (..)
 import Types exposing (..)
 
