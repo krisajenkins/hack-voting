@@ -36,7 +36,7 @@ subscriptions model =
 
 update : Msg -> Model -> Response Model Msg
 update msg model =
-    case Debug.log "MSG" msg of
+    case msg of
         Authenticate ->
             ( { model | auth = Loading }
             , Firebase.authenticate ()
