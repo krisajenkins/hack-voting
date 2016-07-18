@@ -1,4 +1,4 @@
-module Routing exposing (hashParser, hashRouter, parser, toPath, toUri)
+module Routing exposing (hashParser, hashRouter, parser, toPath, toUri, Router)
 
 import Exts.String exposing (removePrefix)
 import String exposing (split, join)
@@ -31,16 +31,20 @@ hashParser hash =
 parser : Parser (View -> a) a
 parser =
     oneOf
-        [ ProjectVotes <<= s ""
-        , ProjectVotes <<= s "#"
+        [ EventView <<= (s "event" </> string)
+        , FrontPage <<= s ""
+        , FrontPage <<= s "#"
         ]
 
 
 toPath : Types.View -> List String
 toPath view =
     case view of
-        ProjectVotes ->
+        FrontPage ->
             [ "" ]
+
+        EventView id ->
+            [ "event", id ]
 
         NotFound ->
             [ "404" ]

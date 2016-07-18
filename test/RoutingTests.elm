@@ -18,7 +18,7 @@ fromUriTests =
     suite "fromUri"
         (List.map (\( uri, view ) -> defaultTest (assertEqual view (hashParser uri)))
             (( "#/total/rubbish", NotFound )
-                :: ( "#", ProjectVotes )
+                :: ( "#", FrontPage )
                 :: exampleRoutes
             )
         )
@@ -34,5 +34,7 @@ fromUriToUriTests =
 
 exampleRoutes : List ( String, Types.View )
 exampleRoutes =
-    [ ( "", ProjectVotes )
+    [ ( "", FrontPage )
+    , ( "#/event/foo", EventView "foo" )
+    , ( "#/event/bar", EventView "bar" )
     ]

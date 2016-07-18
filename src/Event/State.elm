@@ -1,7 +1,7 @@
 module Event.State exposing (..)
 
 import Dict
-import Event.Ports exposing (..)
+import Event.Ports as Ports
 import Event.Rest exposing (..)
 import Event.Types exposing (..)
 import Firebase.Auth exposing (User)
@@ -17,24 +17,31 @@ initialVote =
     }
 
 
-initialState : ( Model, Cmd Msg )
-initialState =
-    ( { event = Loading
+initialState : EventId -> ( Model, Cmd Msg )
+initialState eventId =
+    ( { id = eventId
+      , event = Loading
       , eventError = Nothing
       , voteError = Nothing
       , optionError = Nothing
       }
-    , eventListen ()
+    , Ports.eventListen eventId
     )
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
+subscriptions model =
     Sub.batch
-        [ event (Decode.decodeString decodeEvent >> HeardEvent)
-        , eventError EventError
-        , voteSendError VoteError
-        , optionSendError OptionError
+        [ Ports.event
+            (\( eventId, payload ) ->
+                if model.id == eventId then
+                    Decode.decodeString decodeEvent payload |> HeardEvent
+                else
+                    Ignore
+            )
+        , Ports.eventError EventError
+        , Ports.voteSendError VoteError
+        , Ports.optionSendError OptionError
         ]
 
 
@@ -45,6 +52,9 @@ update user msg model =
             ( { model | event = RemoteData.fromResult response }
             , Cmd.none
             )
+
+        Ignore ->
+            ( model, Cmd.none )
 
         EventError error ->
             ( { model | eventError = Just error }
@@ -71,7 +81,7 @@ update user msg model =
                                     { oldVote | third = optionId }
                     in
                         ( model
-                        , voteSend ( user.uid, newVote )
+                        , Ports.voteSend ( model.id, user.uid, newVote )
                         )
 
                 _ ->

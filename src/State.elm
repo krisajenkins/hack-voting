@@ -1,6 +1,8 @@
 module State exposing (..)
 
+import Dict exposing (Dict)
 import Event.State as Event
+import Exts.Dict exposing (indexBy)
 import Firebase.Auth as Firebase
 import RemoteData as RemoteData exposing (..)
 import Response exposing (..)
@@ -10,7 +12,7 @@ import Types exposing (..)
 initialState : View -> Response Model Msg
 initialState initialView =
     ( { auth = Loading
-      , eventModel = Nothing
+      , events = Dict.empty
       , view = initialView
       }
     , Cmd.none
@@ -21,35 +23,62 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map AuthResponse Firebase.authResponse
-        , model.eventModel
-            |> Maybe.map (Event.subscriptions >> Sub.map EventMsg)
-            |> Maybe.withDefault Sub.none
+        , model.events
+            |> Dict.map
+                (\eventId eventModel ->
+                    Sub.map (EventMsg eventId)
+                        (Event.subscriptions eventModel)
+                )
+            |> Dict.values
+            |> Sub.batch
         ]
 
 
 update : Msg -> Model -> Response Model Msg
 update msg model =
-    case msg of
+    case Debug.log "MSG" msg of
         Authenticate ->
             ( { model | auth = Loading }
             , Firebase.authenticate ()
             )
 
-        AuthResponse response ->
+        AuthResponse ((Success _) as response) ->
             let
-                newModel =
-                    { model | auth = response }
+                events =
+                    [ "languages"
+                    , "projects"
+                    ]
+                        |> List.map Event.initialState
+                        |> indexBy (fst >> .id)
             in
-                Event.initialState
-                    |> mapModel (\eventModel -> { newModel | eventModel = Just eventModel })
-                    |> mapCmd EventMsg
+                ( { model
+                    | auth = response
+                    , events = Dict.map (\k v -> fst v) events
+                  }
+                , events
+                    |> Dict.map
+                        (\eventId eventModel ->
+                            Cmd.map (EventMsg eventId)
+                                (snd eventModel)
+                        )
+                    |> Dict.values
+                    |> Cmd.batch
+                )
 
-        EventMsg submsg ->
-            case ( model.auth, model.eventModel ) of
+        AuthResponse response ->
+            ( { model | auth = response }
+            , Cmd.none
+            )
+
+        EventMsg eventId submsg ->
+            case ( model.auth, Dict.get eventId model.events ) of
                 ( Success user, Just eventModel ) ->
                     Event.update user submsg eventModel
-                        |> mapModel (\eventModel -> { model | eventModel = Just eventModel })
-                        |> mapCmd EventMsg
+                        |> mapModel
+                            (\eventModel ->
+                                { model | events = Dict.insert eventId eventModel model.events }
+                            )
+                        |> mapCmd (EventMsg eventId)
 
                 _ ->
                     ( model, Cmd.none )

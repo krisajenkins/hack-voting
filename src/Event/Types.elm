@@ -6,6 +6,10 @@ import Firebase.Common as Firebase
 import RemoteData exposing (..)
 
 
+type alias EventId =
+    String
+
+
 type alias OptionId =
     String
 
@@ -59,7 +63,8 @@ voteN vote priority =
 
 
 type alias Model =
-    { event : RemoteData String Event
+    { id : EventId
+    , event : RemoteData String Event
     , eventError : Maybe Firebase.Error
     , voteError : Maybe Firebase.Error
     , optionError : Maybe Firebase.Error
@@ -68,10 +73,26 @@ type alias Model =
 
 type Msg
     = HeardEvent (Result String Event)
+    | Ignore
     | EventError Firebase.Error
     | VoteFor Priority (Maybe OptionId)
     | VoteError Firebase.Error
     | OptionError Firebase.Error
+
+
+bestTitle : Model -> String
+bestTitle model =
+    case model.event of
+        Success event ->
+            event.title
+
+        _ ->
+            model.id
+
+
+
+-- | SubmitOption
+-- | ChangeOption FormMsg
 
 
 type FormMsg

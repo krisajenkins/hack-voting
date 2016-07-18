@@ -71,14 +71,14 @@ votingFeedback userVote =
             <| case (List.map (voteN userVote) priorities) of
                 (Just _) :: (Just _) :: (Just _) :: [] ->
                     ( [ class "alert alert-info" ]
-                    , [ h3 [] [ text "Thanks for voting!" ]
+                    , [ h4 [] [ text "Thanks for voting!" ]
                       , p [] [ text "You can change your votes at any time." ]
                       ]
                     )
 
                 _ ->
                     ( [ class "alert alert-warning" ]
-                    , [ h3 [] [ text "Please use your remaining votes." ] ]
+                    , [ h4 [] [ text "Please use your remaining votes." ] ]
                     )
         ]
 

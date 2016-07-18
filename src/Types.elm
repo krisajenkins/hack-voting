@@ -1,6 +1,7 @@
 module Types exposing (..)
 
-import Event.Types
+import Dict exposing (Dict)
+import Event.Types exposing (EventId)
 import Firebase.Auth as Firebase
 import Firebase.Common as Firebase
 import RemoteData exposing (..)
@@ -9,16 +10,17 @@ import RemoteData exposing (..)
 type Msg
     = Authenticate
     | AuthResponse (RemoteData Firebase.Error Firebase.User)
-    | EventMsg Event.Types.Msg
+    | EventMsg EventId Event.Types.Msg
 
 
 type View
-    = ProjectVotes
+    = FrontPage
+    | EventView EventId
     | NotFound
 
 
 type alias Model =
     { auth : RemoteData Firebase.Error Firebase.User
-    , eventModel : Maybe Event.Types.Model
+    , events : Dict EventId Event.Types.Model
     , view : View
     }

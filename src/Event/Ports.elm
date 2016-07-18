@@ -5,23 +5,23 @@ import Firebase.Auth exposing (..)
 import Firebase.Common exposing (..)
 
 
-port event : (String -> msg) -> Sub msg
+port event : (( EventId, String ) -> msg) -> Sub msg
 
 
 port eventError : (Error -> msg) -> Sub msg
 
 
-port eventListen : () -> Cmd msg
+port eventListen : EventId -> Cmd msg
 
 
-port eventSilence : () -> Cmd msg
+port eventSilence : EventId -> Cmd msg
 
 
 
 ------------------------------------------------------------
 
 
-port voteSend : ( UID, Vote ) -> Cmd msg
+port voteSend : ( EventId, UID, Vote ) -> Cmd msg
 
 
 port voteSendError : (Error -> msg) -> Sub msg

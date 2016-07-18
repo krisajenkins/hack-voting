@@ -1,6 +1,8 @@
 module View exposing (root)
 
+import Dict exposing (Dict)
 import Document
+import Event.Types as Event exposing (EventId)
 import Event.View
 import Exts.Html.Bootstrap exposing (..)
 import Html exposing (..)
@@ -8,11 +10,12 @@ import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import RemoteData exposing (..)
+import Routing exposing (Router)
 import Types exposing (..)
 
 
-root : Model -> Html Msg
-root model =
+root : Router View -> Model -> Html Msg
+root router model =
     div []
         [ header []
             [ container
@@ -35,16 +38,24 @@ root model =
         , container
             [ case model.auth of
                 Success user ->
-                    case ( model.view, model.eventModel ) of
-                        ( NotFound, _ ) ->
-                            h2 [] [ text "404 -Not Found" ]
+                    div []
+                        [ eventLinks router model.events
+                        , case model.view of
+                            NotFound ->
+                                h2 [] [ text "404 -Not Found" ]
 
-                        ( ProjectVotes, Nothing ) ->
-                            text "Initialising."
+                            FrontPage ->
+                                h2 [] [ text "Choose something to vote on!" ]
 
-                        ( ProjectVotes, Just eventModel ) ->
-                            Event.View.root user eventModel
-                                |> Html.map EventMsg
+                            EventView eventId ->
+                                case Dict.get eventId model.events of
+                                    Nothing ->
+                                        h2 [] [ text "404 -Not Found" ]
+
+                                    Just eventModel ->
+                                        Event.View.root user eventModel
+                                            |> Html.map (EventMsg eventId)
+                        ]
 
                 Failure err ->
                     div [ class "alert alert-danger" ] [ text err.message ]
@@ -73,3 +84,20 @@ canAuthenticate model =
 
         Failure _ ->
             False
+
+
+eventLinks : Router View -> Dict EventId Event.Model -> Html msg
+eventLinks router events =
+    ul [ class "nav nav-tabs" ]
+        (events
+            |> Dict.values
+            |> List.map (eventLink router)
+        )
+
+
+eventLink : Router View -> Event.Model -> Html msg
+eventLink router event =
+    li []
+        [ a [ href (router (EventView event.id)) ]
+            [ h4 [] [ text <| Event.bestTitle event ] ]
+        ]

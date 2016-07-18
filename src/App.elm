@@ -20,5 +20,5 @@ main =
         , update = State.update
         , urlUpdate = State.urlUpdate
         , subscriptions = State.subscriptions
-        , view = View.root
+        , view = View.root Routing.toUri
         }

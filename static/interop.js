@@ -24,9 +24,11 @@
 
 
     // Event.
-    var eventPath = firebase.database().ref('/events/projects');
+    var eventsPath = firebase.database().ref('/events');
 
-    app.ports.eventListen.subscribe(function () {
+    app.ports.eventListen.subscribe(function (eventId) {
+        var eventPath = eventsPath.child(eventId);
+
         console.log('LISTENING', eventPath.toString());
         eventPath.on(
             'value',
@@ -34,27 +36,29 @@
                 var rawValue = snapshot.val();
                 console.log('HEARD', rawValue);
 
-                app.ports.event.send(JSON.stringify(rawValue));
+                app.ports.event.send([eventId, JSON.stringify(rawValue)]);
             },
             app.ports.eventError.send
         );
     });
 
-    app.ports.eventSilence.subscribe(function () {
+    app.ports.eventSilence.subscribe(function (eventId) {
+        var eventPath = eventsPath.child(eventId);
+
         console.log('SILENCING', eventPath.toString());
         eventPath.off('value');
     });
 
     // Voting.
-    var votePath = eventPath.child('votes');
-    var options = eventPath.child('options');
-
     app.ports.voteSend.subscribe(function (msg) {
-        var uid = msg[0],
-            vote = msg[1],
-            path = votePath.child(uid);
+        var eventId = msg[0],
+            uid = msg[1],
+            vote = msg[2];
+        var eventPath = eventsPath.child(eventId);
+        var votePath = eventPath.child('votes');
+        var userPath = votePath.child(uid);
 
-        path.set(vote)
+        userPath.set(vote)
             .catch(app.ports.voteSendError.send);
     });
 }());
