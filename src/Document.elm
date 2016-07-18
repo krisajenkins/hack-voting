@@ -11,3 +11,8 @@ locationHref =
 locationOrigin : () -> String
 locationOrigin =
     Native.Document.locationOrigin
+
+
+locationHost : () -> String
+locationHost =
+    Native.Document.locationHost

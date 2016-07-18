@@ -19,7 +19,7 @@ root router model =
     div []
         [ header []
             [ container
-                [ h1 [ class "hostname" ] [ text (Document.locationOrigin ()) ]
+                [ h1 [ class "hostname" ] [ text (Document.locationHost ()) ]
                 , row
                     [ div [ class "col-xs-12 col-sm-8" ]
                         [ h1 [] [ text "Vote-o-Matic" ] ]

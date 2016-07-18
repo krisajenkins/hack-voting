@@ -8,6 +8,9 @@ var _krisajenkins$voting$Native_Document = function() {
         },
         locationOrigin : function ()  {
             return document.location.origin;
+        },
+        locationHost : function ()  {
+            return document.location.host;
         }
     };
 }();
