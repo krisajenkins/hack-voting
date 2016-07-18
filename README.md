@@ -21,3 +21,7 @@ $ make
 $ firebase deploy
 $ firebase open hosting:site
 ```
+
+## License
+
+Copyright © 2016 Kris Jenkins. All rights reserved.
