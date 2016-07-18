@@ -1,4 +1,4 @@
-module Document exposing (locationHref)
+module Document exposing (..)
 
 import Native.Document
 
@@ -6,3 +6,8 @@ import Native.Document
 locationHref : () -> String
 locationHref =
     Native.Document.locationHref
+
+
+locationOrigin : () -> String
+locationOrigin =
+    Native.Document.locationOrigin

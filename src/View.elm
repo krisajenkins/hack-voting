@@ -16,11 +16,11 @@ root model =
     div []
         [ header []
             [ container
-                [ row
+                [ div []
+                    [ h1 [] [ text (Document.locationOrigin ()) ] ]
+                , row
                     [ div [ class "col-xs-12 col-sm-8" ]
-                        [ h1 [] [ text "Vote-o-Matic" ]
-                        , h1 [] [ text (Document.locationHref ()) ]
-                        ]
+                        [ h1 [] [ text "Vote-o-Matic" ] ]
                     , div [ class "col-xs-12 col-sm-4" ]
                         [ button
                             [ class "btn btn-lg btn-block btn-primary"
