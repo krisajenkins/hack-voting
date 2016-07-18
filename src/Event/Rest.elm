@@ -31,7 +31,7 @@ decodeOption =
     decode Option
         |> optional "owner" (maybe string) Nothing
         |> required "name" string
-        |> required "description" string
+        |> optional "description" (maybe string) Nothing
 
 
 decodeEvent : Decoder Event

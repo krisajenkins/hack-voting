@@ -101,7 +101,12 @@ optionView userVote ( id, option ) =
         [ div [ class "pull-right" ]
             [ voteButtons userVote id ]
         , h3 [] [ text option.name ]
-        , div [] [ text option.description ]
+        , case option.description of
+            Nothing ->
+                text ""
+
+            Just description ->
+                div [] [ text description ]
         ]
 
 

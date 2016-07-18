@@ -20,7 +20,7 @@ type alias Event =
 type alias Option =
     { owner : Maybe Firebase.UID
     , name : String
-    , description : String
+    , description : Maybe String
     }
 
 
