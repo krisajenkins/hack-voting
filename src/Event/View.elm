@@ -51,7 +51,10 @@ eventView user event =
                 |> Maybe.withDefault initialVote
     in
         div []
-            [ yourVote userVote
+            [ row
+                [ div [ class "col-xs-12 col-sm-6" ]
+                    [ votingFeedback userVote ]
+                ]
             , row
                 [ div [ class "col-xs-12 col-sm-6" ]
                     [ projectsView userVote event.projects ]
@@ -61,19 +64,23 @@ eventView user event =
             ]
 
 
-yourVote : Vote -> Html msg
-yourVote userVote =
-    uncurry h3
-        <| case (List.map (voteN userVote) priorities) of
-            (Just _) :: (Just _) :: (Just _) :: [] ->
-                ( [ class "alert alert-info" ]
-                , [ text "Thanks for voting!" ]
-                )
+votingFeedback : Vote -> Html msg
+votingFeedback userVote =
+    div [ class "voting-feedback" ]
+        [ uncurry div
+            <| case (List.map (voteN userVote) priorities) of
+                (Just _) :: (Just _) :: (Just _) :: [] ->
+                    ( [ class "alert alert-info" ]
+                    , [ h3 [] [ text "Thanks for voting!" ]
+                      , p [] [ text "You can change your votes at any time." ]
+                      ]
+                    )
 
-            _ ->
-                ( [ class "alert alert-warning" ]
-                , [ text "Please use your remaining votes." ]
-                )
+                _ ->
+                    ( [ class "alert alert-warning" ]
+                    , [ h3 [] [ text "Please use your remaining votes." ] ]
+                    )
+        ]
 
 
 projectsView : Vote -> Dict String Project -> Html Msg
@@ -186,7 +193,7 @@ votesView event =
                 |> Dict.toList
     in
         div []
-            [ h2 [] [ text "Votes" ]
+            [ h2 [] [ text "Live Results" ]
             , if List.isEmpty tallied then
                 empty
               else
