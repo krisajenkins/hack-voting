@@ -2,6 +2,7 @@ module Event.Types exposing (..)
 
 import Dict exposing (Dict)
 import Exts.RemoteData exposing (..)
+import Firebase.Auth as Firebase
 import Firebase.Common as Firebase
 
 
@@ -16,7 +17,8 @@ type alias Event =
 
 
 type alias Project =
-    { name : String
+    { owner : Maybe Firebase.UID
+    , name : String
     , description : String
     }
 
@@ -59,11 +61,18 @@ type alias Model =
     { event : RemoteData String Event
     , eventError : Maybe Firebase.Error
     , voteError : Maybe Firebase.Error
+    , projectError : Maybe Firebase.Error
     }
 
 
 type Msg
     = HeardEvent (Result String Event)
     | EventError Firebase.Error
-    | VoteError Firebase.Error
     | VoteFor Priority (Maybe ProjectId)
+    | VoteError Firebase.Error
+    | ProjectError Firebase.Error
+
+
+type FormMsg
+    = SetName
+    | SetDescription

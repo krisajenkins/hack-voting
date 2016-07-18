@@ -1,8 +1,8 @@
 module Event.Rest exposing (..)
 
 import Dict
-import Exts.Maybe
 import Event.Types exposing (..)
+import Exts.Maybe
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (..)
 import Json.Encode as Encode exposing (null)
@@ -29,6 +29,7 @@ decodeVote =
 decodeProject : Decoder Project
 decodeProject =
     decode Project
+        |> optional "owner" (maybe string) Nothing
         |> required "name" string
         |> required "description" string
 

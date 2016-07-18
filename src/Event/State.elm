@@ -22,6 +22,7 @@ initialState =
     ( { event = Loading
       , eventError = Nothing
       , voteError = Nothing
+      , projectError = Nothing
       }
     , eventListen ()
     )
@@ -33,17 +34,13 @@ subscriptions _ =
         [ event (Decode.decodeString decodeEvent >> HeardEvent)
         , eventError EventError
         , voteSendError VoteError
+        , projectSendError ProjectError
         ]
 
 
 update : User -> Msg -> Model -> ( Model, Cmd Msg )
 update user msg model =
     case msg of
-        VoteError err ->
-            ( { model | voteError = Just err }
-            , Cmd.none
-            )
-
         HeardEvent response ->
             ( { model | event = RemoteData.fromResult response }
             , Cmd.none
@@ -79,3 +76,13 @@ update user msg model =
 
                 _ ->
                     ( model, Cmd.none )
+
+        VoteError err ->
+            ( { model | voteError = Just err }
+            , Cmd.none
+            )
+
+        ProjectError err ->
+            ( { model | projectError = Just err }
+            , Cmd.none
+            )

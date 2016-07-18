@@ -4,8 +4,10 @@ import Dict exposing (Dict)
 import Event.State exposing (..)
 import Event.Types exposing (..)
 import Exts.Html.Bootstrap exposing (..)
+import Exts.Maybe exposing (maybe)
 import Exts.RemoteData exposing (..)
 import Firebase.Auth exposing (User)
+import Firebase.Common as Firebase
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -13,18 +15,32 @@ import Html.Events exposing (..)
 
 root : User -> Model -> Html Msg
 root user model =
-    case model.event of
-        Success event ->
-            eventView user event
+    div []
+        [ maybe empty (errorView "There was a problem loading this event.") model.eventError
+        , maybe empty (errorView "There was a problem saving your vote.") model.voteError
+        , maybe empty (errorView "There was a problem saving your project.") model.projectError
+        , case model.event of
+            Success event ->
+                eventView user event
 
-        Failure err ->
-            div [ class "alert alert-danger" ] [ text err ]
+            Failure err ->
+                div [ class "alert alert-danger" ] [ text err ]
 
-        Loading ->
-            h2 [] [ i [] [ text "Waiting for event data..." ] ]
+            Loading ->
+                h2 [] [ i [] [ text "Waiting for event data..." ] ]
 
-        NotAsked ->
-            h2 [] [ text "Initialising." ]
+            NotAsked ->
+                h2 [] [ text "Initialising." ]
+        ]
+
+
+errorView : String -> Firebase.Error -> Html msg
+errorView title error =
+    div [ class "alert alert-danger" ]
+        [ h3 [] [ text title ]
+        , text (toString error.code)
+        , text error.message
+        ]
 
 
 eventView : User -> Event -> Html Msg
