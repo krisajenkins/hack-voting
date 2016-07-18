@@ -1,5 +1,6 @@
 module View exposing (root)
 
+import Document
 import Event.View
 import Exts.Html.Bootstrap exposing (..)
 import Html exposing (..)
@@ -18,6 +19,7 @@ root model =
                 [ row
                     [ div [ class "col-xs-12 col-md-9" ]
                         [ h1 [] [ text "Vote-o-Matic" ]
+                        , h1 [] [ text (Document.locationHref ()) ]
                         ]
                     , button
                         [ class "btn btn-lg btn-primary col-xs-12 col-sm-3"
