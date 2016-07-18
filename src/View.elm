@@ -45,7 +45,7 @@ root router model =
                                 h2 [] [ text "404 -Not Found" ]
 
                             FrontPage ->
-                                h2 [] [ text "Choose something to vote on!" ]
+                                h3 [] [ text "Choose one of the tabs above to start voting." ]
 
                             EventView eventId ->
                                 case Dict.get eventId model.events of
