@@ -63,14 +63,17 @@ eventView user event =
 
 yourVote : Vote -> Html msg
 yourVote userVote =
-    h3 []
-        [ case (List.map (voteN userVote) priorities) of
+    uncurry h3
+        <| case (List.map (voteN userVote) priorities) of
             (Just _) :: (Just _) :: (Just _) :: [] ->
-                text "Thanks for voting!"
+                ( [ class "alert alert-info" ]
+                , [ text "Thanks for voting!" ]
+                )
 
             _ ->
-                text "Please use your remaining votes."
-        ]
+                ( [ class "alert alert-warning" ]
+                , [ text "Please use your remaining votes." ]
+                )
 
 
 projectsView : Vote -> Dict String Project -> Html Msg
@@ -213,21 +216,16 @@ voteBar projects maxCount ( projectId, voteCount ) =
         pct n =
             toString n ++ "%"
     in
-        div []
+        div [ class "vote" ]
             [ h3 []
                 [ text name
                 , text " "
                 , badge voteCount
                 ]
             , div
-                [ style
+                [ class "bar"
+                , style
                     [ ( "width", pct width )
-                    , ( "margin", "15px 0" )
-                    , ( "padding", "10px" )
-                    , ( "background-color", "#3DF236" )
-                    , ( "border", "solid 2px #28A024" )
-                    , ( "border-radius", "10px" )
-                    , ( "transition", "width 200ms" )
                     ]
                 ]
                 []

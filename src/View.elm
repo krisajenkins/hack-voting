@@ -13,15 +13,23 @@ import Types exposing (..)
 root : Model -> Html Msg
 root model =
     div []
-        [ container
-            [ h1 [] [ text "Vote-o-matic" ]
-            , button
-                [ class "btn btn-primary pull-right"
-                , onClick Authenticate
-                , disabled (canAuthenticate model)
+        [ header []
+            [ container
+                [ row
+                    [ div [ class "col-xs-12 col-md-9" ]
+                        [ h1 [] [ text "Vote-o-Matic" ]
+                        ]
+                    , button
+                        [ class "btn btn-lg btn-primary col-xs-12 col-sm-3"
+                        , onClick Authenticate
+                        , disabled (canAuthenticate model)
+                        ]
+                        [ text "Log In" ]
+                    ]
                 ]
-                [ text "Log In" ]
-            , case model.auth of
+            ]
+        , container
+            [ case model.auth of
                 Success user ->
                     case model.eventModel of
                         Nothing ->
