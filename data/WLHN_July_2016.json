@@ -1,0 +1,61 @@
+{
+    "events": {
+        "languages": {
+			"title": "Languages",
+            "options": {
+                "c": {"name": "C"},
+                "clojure": {"name": "Clojure"},
+                "elisp": {"name": "Emacs Lisp"},
+                "elm": {"name": "Elm"},
+                "erlang": {"name": "Erlang"},
+                "fsharp": {"name": "F#"},
+                "groovy": {"name": "Groovy"},
+                "haskell": {"name": "Haskell"},
+                "java": {"name": "Java"},
+                "javascript": {"name": "JavaScript"},
+                "php": {"name": "PHP"},
+                "purescript": {"name": "PureScript"},
+                "python": {"name": "Python"},
+                "ruby": {"name": "Ruby"},
+                "scala": {"name": "Scala"},
+                "swift": {"name": "Swift"}
+            },
+            "votes": {
+            }
+        },
+        "projects": {
+			"title": "Projects",
+            "options": {
+                "wireworld": {
+                    "name": "WireWorld",
+                    "description": "[WireWorld](https://en.wikipedia.org/wiki/Wireworld) is a turing-complete cellular automata. It's also quite pretty."
+                },
+                "doom": {
+                    "name": "Minimum Viable Doom",
+                    "description": "How much of the game Doom can you code up in 90 minutes? *Bonus points for creativity.*"
+                },
+                "sheeppen": {
+                    "name": "Sheep Pen",
+                    "description": "Drop sheep at random points in a field. What's the smallest length of fencing you'd now need to enclose them all? ([Suggested Algorithm](https://en.wikipedia.org/wiki/Rotating_calipers).)"
+                },
+                "hackyoureditor": {
+                    "name": "Hack Your Editor",
+                    "description": "For any text editor you choose, implement a command to get the star count of the current project from GitHub."
+                },
+                "huffman": {
+                    "name": "Huffman Encoding",
+                    "description": "[Huffman encoding](https://en.wikipedia.org/wiki/Huffman_coding) is one of the simplest text-compression algorithms, but it's also quite effective. Implement it."
+                },
+                "pokemongo": {
+                    "name": "Pokemon Go Faster",
+                    "description": ""
+                },
+                "palindrome": {
+                    "name": "Palindrome",
+                    "description": "Test if a string is a palindrome."
+                }
+            },
+            "votes": {}
+        }
+    }
+}
