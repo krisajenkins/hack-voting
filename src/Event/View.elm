@@ -10,6 +10,7 @@ import Firebase.Common as Firebase
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Markdown
 import RemoteData exposing (..)
 
 
@@ -101,12 +102,7 @@ optionView userVote ( id, option ) =
         [ div [ class "pull-right" ]
             [ voteButtons userVote id ]
         , h3 [] [ text option.name ]
-        , case option.description of
-            Nothing ->
-                text ""
-
-            Just description ->
-                div [] [ text description ]
+        , Markdown.toHtml [] (Maybe.withDefault "" option.description)
         ]
 
 
