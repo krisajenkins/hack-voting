@@ -24,7 +24,7 @@
 
 
     // Event.
-    var eventPath = firebase.database().ref('/events/alpha');
+    var eventPath = firebase.database().ref('/events/projects');
 
     app.ports.eventListen.subscribe(function () {
         console.log('LISTENING', eventPath.toString());
@@ -47,6 +47,7 @@
 
     // Voting.
     var votePath = eventPath.child('votes');
+    var options = eventPath.child('options');
 
     app.ports.voteSend.subscribe(function (msg) {
         var uid = msg[0],

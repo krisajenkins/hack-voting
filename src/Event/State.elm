@@ -22,7 +22,7 @@ initialState =
     ( { event = Loading
       , eventError = Nothing
       , voteError = Nothing
-      , projectError = Nothing
+      , optionError = Nothing
       }
     , eventListen ()
     )
@@ -34,7 +34,7 @@ subscriptions _ =
         [ event (Decode.decodeString decodeEvent >> HeardEvent)
         , eventError EventError
         , voteSendError VoteError
-        , projectSendError ProjectError
+        , optionSendError OptionError
         ]
 
 
@@ -51,7 +51,7 @@ update user msg model =
             , Cmd.none
             )
 
-        VoteFor priority projectId ->
+        VoteFor priority optionId ->
             case model.event of
                 Success event ->
                     let
@@ -62,13 +62,13 @@ update user msg model =
                         newVote =
                             case priority of
                                 First ->
-                                    { oldVote | first = projectId }
+                                    { oldVote | first = optionId }
 
                                 Second ->
-                                    { oldVote | second = projectId }
+                                    { oldVote | second = optionId }
 
                                 Third ->
-                                    { oldVote | third = projectId }
+                                    { oldVote | third = optionId }
                     in
                         ( model
                         , voteSend ( user.uid, newVote )
@@ -82,7 +82,7 @@ update user msg model =
             , Cmd.none
             )
 
-        ProjectError err ->
-            ( { model | projectError = Just err }
+        OptionError err ->
+            ( { model | optionError = Just err }
             , Cmd.none
             )

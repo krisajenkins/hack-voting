@@ -31,7 +31,7 @@ port voteSendError : (Error -> msg) -> Sub msg
 ------------------------------------------------------------
 
 
-port projectSend : ( UID, Project ) -> Cmd msg
+port optionSend : Option -> Cmd msg
 
 
-port projectSendError : (Error -> msg) -> Sub msg
+port optionSendError : (Error -> msg) -> Sub msg

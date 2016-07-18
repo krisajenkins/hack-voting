@@ -26,9 +26,9 @@ decodeVote =
         |> optional "third" (maybe string) Nothing
 
 
-decodeProject : Decoder Project
-decodeProject =
-    decode Project
+decodeOption : Decoder Option
+decodeOption =
+    decode Option
         |> optional "owner" (maybe string) Nothing
         |> required "name" string
         |> required "description" string
@@ -37,5 +37,6 @@ decodeProject =
 decodeEvent : Decoder Event
 decodeEvent =
     decode Event
-        |> optional "projects" (dict decodeProject) Dict.empty
+        |> required "title" string
+        |> optional "options" (dict decodeOption) Dict.empty
         |> optional "votes" (dict decodeVote) Dict.empty

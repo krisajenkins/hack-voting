@@ -6,17 +6,18 @@ import Firebase.Common as Firebase
 import RemoteData exposing (..)
 
 
-type alias ProjectId =
+type alias OptionId =
     String
 
 
 type alias Event =
-    { projects : Dict ProjectId Project
+    { title : String
+    , options : Dict OptionId Option
     , votes : Dict String Vote
     }
 
 
-type alias Project =
+type alias Option =
     { owner : Maybe Firebase.UID
     , name : String
     , description : String
@@ -24,9 +25,9 @@ type alias Project =
 
 
 type alias Vote =
-    { first : Maybe ProjectId
-    , second : Maybe ProjectId
-    , third : Maybe ProjectId
+    { first : Maybe OptionId
+    , second : Maybe OptionId
+    , third : Maybe OptionId
     }
 
 
@@ -44,7 +45,7 @@ priorities =
     ]
 
 
-voteN : Vote -> Priority -> Maybe ProjectId
+voteN : Vote -> Priority -> Maybe OptionId
 voteN vote priority =
     case priority of
         First ->
@@ -61,16 +62,16 @@ type alias Model =
     { event : RemoteData String Event
     , eventError : Maybe Firebase.Error
     , voteError : Maybe Firebase.Error
-    , projectError : Maybe Firebase.Error
+    , optionError : Maybe Firebase.Error
     }
 
 
 type Msg
     = HeardEvent (Result String Event)
     | EventError Firebase.Error
-    | VoteFor Priority (Maybe ProjectId)
+    | VoteFor Priority (Maybe OptionId)
     | VoteError Firebase.Error
-    | ProjectError Firebase.Error
+    | OptionError Firebase.Error
 
 
 type FormMsg

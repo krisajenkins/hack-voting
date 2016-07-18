@@ -18,7 +18,7 @@ root user model =
     div []
         [ maybe empty (errorView "There was a problem loading this event.") model.eventError
         , maybe empty (errorView "There was a problem saving your vote.") model.voteError
-        , maybe empty (errorView "There was a problem saving your project.") model.projectError
+        , maybe empty (errorView "There was a problem saving your option.") model.optionError
         , case model.event of
             Success event ->
                 eventView user event
@@ -57,7 +57,7 @@ eventView user event =
                 ]
             , row
                 [ div [ class "col-xs-12 col-sm-6" ]
-                    [ projectsView userVote event.projects ]
+                    [ optionsView userVote event ]
                 , div [ class "col-xs-12 col-sm-6" ]
                     [ votesView event ]
                 ]
@@ -83,25 +83,25 @@ votingFeedback userVote =
         ]
 
 
-projectsView : Vote -> Dict String Project -> Html Msg
-projectsView userVote projects =
+optionsView : Vote -> Event -> Html Msg
+optionsView userVote event =
     div []
-        [ h2 [] [ text "Projects" ]
+        [ h2 [] [ text event.title ]
         , div [ class "list-group" ]
-            (projects
+            (event.options
                 |> Dict.toList
-                |> List.map (projectView userVote)
+                |> List.map (optionView userVote)
             )
         ]
 
 
-projectView : Vote -> ( String, Project ) -> Html Msg
-projectView userVote ( id, project ) =
+optionView : Vote -> ( String, Option ) -> Html Msg
+optionView userVote ( id, option ) =
     div [ class "list-group-item" ]
         [ div [ class "pull-right" ]
             [ voteButtons userVote id ]
-        , h3 [] [ text project.name ]
-        , div [] [ text project.description ]
+        , h3 [] [ text option.name ]
+        , div [] [ text option.description ]
         ]
 
 
@@ -122,8 +122,8 @@ priorityString priority =
                 builder "3" "rd"
 
 
-voteButtons : Vote -> ProjectId -> Html Msg
-voteButtons userVote projectId =
+voteButtons : Vote -> OptionId -> Html Msg
+voteButtons userVote optionId =
     let
         ordButton priority =
             let
@@ -132,8 +132,8 @@ voteButtons userVote projectId =
                         Nothing ->
                             False
 
-                        Just votedProjectId ->
-                            votedProjectId == projectId
+                        Just votedOptionId ->
+                            votedOptionId == optionId
             in
                 button
                     [ classList
@@ -146,7 +146,7 @@ voteButtons userVote projectId =
                             (if active then
                                 Nothing
                              else
-                                Just projectId
+                                Just optionId
                             )
                         )
                     ]
@@ -156,7 +156,7 @@ voteButtons userVote projectId =
             (List.map ordButton priorities)
 
 
-tally : Dict String Vote -> Dict ProjectId Int
+tally : Dict String Vote -> Dict OptionId Int
 tally =
     let
         increment =
@@ -199,22 +199,22 @@ votesView event =
               else
                 well
                     (tallied
-                        |> List.map (voteBar event.projects maxCount)
+                        |> List.map (voteBar event.options maxCount)
                         |> List.intersperse (hr [] [])
                     )
             ]
 
 
-voteBar : Dict ProjectId Project -> Int -> ( ProjectId, Int ) -> Html msg
-voteBar projects maxCount ( projectId, voteCount ) =
+voteBar : Dict OptionId Option -> Int -> ( OptionId, Int ) -> Html msg
+voteBar options maxCount ( optionId, voteCount ) =
     let
         name =
-            case Dict.get projectId projects of
+            case Dict.get optionId options of
                 Nothing ->
-                    projectId
+                    optionId
 
-                Just project ->
-                    project.name
+                Just option ->
+                    option.name
 
         width =
             (toFloat voteCount / toFloat maxCount)

@@ -2,13 +2,13 @@
     "events": {
         ".read": true,
         ".write": false,
-        "alpha": {
+        "$event": {
             "votes": {
                 "$uid": {
                     ".write": "$uid === auth.uid"
                 }
             },
-            "projects": {
+            "options": {
             }
         }
     }
