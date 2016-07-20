@@ -16,15 +16,6 @@ addEventListener(
         });
 
 
-        // Looks like this doesn't work at all if it fires before the Elm
-        // app has finished initialising. But why hasn't it, by this
-        // stage???
-        setTimeout(function() {
-            firebaseApp.auth()
-                .onAuthStateChanged(app.ports.authStateChanged.send);
-        }, 1);
-
-
         // Event.
         var eventsPath = firebase.database().ref('/events');
 
@@ -63,6 +54,14 @@ addEventListener(
             userPath.set(vote)
                 .catch(app.ports.voteSendError.send);
         });
+
+        // Looks like this doesn't work at all if it fires before the Elm
+        // app has finished initialising. But why hasn't it, by this
+        // stage???
+        setTimeout(function() {
+            firebaseApp.auth()
+                .onAuthStateChanged(app.ports.authStateChanged.send);
+        }, 1);
     },
     false
 );
