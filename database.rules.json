@@ -1,15 +1,16 @@
 {
-    "events": {
-        ".read": true,
-        ".write": false,
-        "$event": {
-            "votes": {
-                "$uid": {
-                    ".write": "$uid === auth.uid"
+    "rules": {
+        "events": {
+            "$event": {
+                "options": {},
+                "votes": {
+                    "$uid": {
+                        ".write": "$uid === auth.uid"
+                    }
                 }
             },
-            "options": {
-            }
+            ".read": true,
+            ".write": false
         }
     }
 }
