@@ -1,61 +1,211 @@
 {
     "events": {
         "languages": {
-			"title": "Languages",
             "options": {
-                "c": {"name": "C"},
-                "clojure": {"name": "Clojure"},
-                "elisp": {"name": "Emacs Lisp"},
-                "elm": {"name": "Elm"},
-                "erlang": {"name": "Erlang"},
-                "fsharp": {"name": "F#"},
-                "groovy": {"name": "Groovy"},
-                "haskell": {"name": "Haskell"},
-                "java": {"name": "Java"},
-                "javascript": {"name": "JavaScript"},
-                "php": {"name": "PHP"},
-                "purescript": {"name": "PureScript"},
-                "python": {"name": "Python"},
-                "ruby": {"name": "Ruby"},
-                "scala": {"name": "Scala"},
-                "swift": {"name": "Swift"}
+                "c": {
+                    "name": "C/C++"
+                },
+                "clojure": {
+                    "name": "Clojure"
+                },
+                "elisp": {
+                    "name": "Emacs Lisp"
+                },
+                "elm": {
+                    "name": "Elm"
+                },
+                "erlang": {
+                    "name": "Erlang"
+                },
+                "fsharp": {
+                    "name": "F#"
+                },
+                "go": {
+                    "name": "Go"
+                },
+                "groovy": {
+                    "name": "Groovy"
+                },
+                "haskell": {
+                    "name": "Haskell"
+                },
+                "java": {
+                    "name": "Java"
+                },
+                "javascript": {
+                    "name": "JavaScript"
+                },
+                "php": {
+                    "name": "PHP"
+                },
+                "purescript": {
+                    "name": "PureScript"
+                },
+                "python": {
+                    "name": "Python"
+                },
+                "ruby": {
+                    "name": "Ruby"
+                },
+                "rust": {
+                    "name": "Rust"
+                },
+                "scala": {
+                    "name": "Scala"
+                },
+                "swift": {
+                    "name": "Swift"
+                }
             },
+            "title": "Languages",
             "votes": {
+                "1LrrJCVQq4bDzh6PKt3MkpLbEVj2": {
+                    "first": "haskell",
+                    "second": "elm",
+                    "third": "rust"
+                },
+                "2KaT6ZrzKPZF5v3oZR4sz5VjZiy1": {
+                    "first": "haskell",
+                    "second": "rust"
+                },
+                "50h8AaeCugR1VLDOUCkjHIwi2Rq1": {
+                    "first": "scala",
+                    "second": "rust",
+                    "third": "go"
+                },
+                "59wG2JhAwuNIfSYPIleWOLjdx8g2": {
+                    "first": "scala"
+                },
+                "5gIxJTthooWvVkq1qikMywXONKJ3": {
+                    "first": "swift",
+                    "second": "swift",
+                    "third": "swift"
+                },
+                "ByaTyhWkWvaJpx804lWIfqjngj82": {
+                    "first": "c",
+                    "second": "c"
+                },
+                "JXHqr1LkgbXtZyHNWR2q7KnQNDr1": {
+                    "first": "c",
+                    "second": "elisp",
+                    "third": "rust"
+                },
+                "OAiT2D7oULhzkFbtSKD1IvShGkp1": {
+                    "first": "elm",
+                    "second": "haskell",
+                    "third": "swift"
+                },
+                "Vv9QgajmWsSnwrKuGYKntMCm9xk2": {
+                    "first": "rust",
+                    "second": "python",
+                    "third": "rust"
+                },
+                "Ya4uPTERCTOyyc7AT6rwJTqTEPr1": {
+                    "first": "go",
+                    "second": "elm",
+                    "third": "python"
+                },
+                "aZQTe1NLUfRUVOQ82S3yVdYlp4D3": {
+                    "first": "go",
+                    "second": "scala",
+                    "third": "c"
+                },
+                "nz1ug3vgh3hAQCfN4WXyvxieZrl1": {
+                    "first": "java",
+                    "second": "scala",
+                    "third": "javascript"
+                },
+                "vM3vVpSJdzNxhy0c9bDtRB1n7ly1": {
+                    "first": "go",
+                    "second": "ruby",
+                    "third": "c"
+                }
             }
         },
         "projects": {
-			"title": "Projects",
             "options": {
-                "wireworld": {
-                    "name": "WireWorld",
-                    "description": "[WireWorld](https://en.wikipedia.org/wiki/Wireworld) is a turing-complete cellular automata. It's also quite pretty."
-                },
                 "doom": {
-                    "name": "Minimum Viable Doom",
-                    "description": "How much of the game Doom can you code up in 90 minutes? *Bonus points for creativity.*"
-                },
-                "sheeppen": {
-                    "name": "Sheep Pen",
-                    "description": "Drop sheep at random points in a field. What's the smallest length of fencing you'd now need to enclose them all? ([Suggested Algorithm](https://en.wikipedia.org/wiki/Rotating_calipers).)"
+                    "description": "How much of the game Doom can you code up in 90 minutes? *Bonus points for creativity.*",
+                    "name": "Minimum Viable Doom"
                 },
                 "hackyoureditor": {
-                    "name": "Hack Your Editor",
-                    "description": "For any text editor you choose, implement a command to get the star count of the current project from GitHub."
+                    "description": "For any text editor you choose, implement a command to get the star count of the current project from GitHub.",
+                    "name": "Hack Your Editor"
                 },
                 "huffman": {
-                    "name": "Huffman Encoding",
-                    "description": "[Huffman encoding](https://en.wikipedia.org/wiki/Huffman_coding) is one of the simplest text-compression algorithms, but it's also quite effective. Implement it."
+                    "description": "[Huffman encoding](https://en.wikipedia.org/wiki/Huffman_coding) is one of the simplest text-compression algorithms, but it's also quite effective. Implement it.",
+                    "name": "Huffman Encoding"
                 },
-                "pokemongo": {
-                    "name": "Pokemon Go Faster",
-                    "description": ""
+                "meetingnope": {
+                    "description": "We need a tool that can connect to Google Calendar and decline all meetings.",
+                    "name": "Meeting Decliner"
                 },
                 "palindrome": {
-                    "name": "Palindrome",
-                    "description": "Test if a string is a palindrome."
+                    "description": "Test if a string is a palindrome.",
+                    "name": "Palindrome"
+                },
+                "sheeppen": {
+                    "description": "Drop sheep at random points in a field. What's the smallest length of fencing you'd now need to enclose them all? ([Suggested Algorithm](https://en.wikipedia.org/wiki/Rotating_calipers).)",
+                    "name": "Sheep Pen"
+                },
+                "tonephone": {
+                    "description": "Remember those [touch-tone phones](https://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling) that played a unique chord for each number? Write an encoder, a decoder, or both!",
+                    "name": "Tone Phone"
+                },
+                "wireworld": {
+                    "description": "[WireWorld](https://en.wikipedia.org/wiki/Wireworld) is a turing-complete cellular automata. It's also quite pretty.",
+                    "name": "WireWorld"
                 }
             },
-            "votes": {}
+            "title": "Projects",
+            "votes": {
+                "1LrrJCVQq4bDzh6PKt3MkpLbEVj2": {
+                    "first": "huffman",
+                    "second": "tonephone",
+                    "third": "wireworld"
+                },
+                "2KaT6ZrzKPZF5v3oZR4sz5VjZiy1": {
+                    "second": "tonephone"
+                },
+                "50h8AaeCugR1VLDOUCkjHIwi2Rq1": {
+                    "first": "tonephone",
+                    "second": "huffman"
+                },
+                "JXHqr1LkgbXtZyHNWR2q7KnQNDr1": {
+                    "second": "wireworld",
+                    "third": "sheeppen"
+                },
+                "OAiT2D7oULhzkFbtSKD1IvShGkp1": {
+                    "first": "tonephone",
+                    "second": "wireworld",
+                    "third": "sheeppen"
+                },
+                "Vv9QgajmWsSnwrKuGYKntMCm9xk2": {
+                    "first": "huffman",
+                    "second": "sheeppen",
+                    "third": "sheeppen"
+                },
+                "Ya4uPTERCTOyyc7AT6rwJTqTEPr1": {
+                    "first": "meetingnope",
+                    "second": "wireworld",
+                    "third": "tonephone"
+                },
+                "aZQTe1NLUfRUVOQ82S3yVdYlp4D3": {
+                    "first": "tonephone",
+                    "second": "meetingnope",
+                    "third": "wireworld"
+                },
+                "nz1ug3vgh3hAQCfN4WXyvxieZrl1": {
+                    "first": "sheeppen",
+                    "second": "huffman",
+                    "third": "wireworld"
+                },
+                "vM3vVpSJdzNxhy0c9bDtRB1n7ly1": {
+                    "first": "palindrome",
+                    "second": "tonephone",
+                    "third": "sheeppen"
+                }
+            }
         }
     }
 }
