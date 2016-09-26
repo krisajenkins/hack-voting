@@ -1,8 +1,7 @@
 /*global Elm, firebase, firebaseConfig */
 
-addEventListener(
-    'load',
-    function () {
+(function () {
+    var startup = function () {
         // Start the Elm App.
         var app = Elm.App.fullscreen();
 
@@ -14,7 +13,6 @@ addEventListener(
             firebase.auth().signInAnonymously()
                 .catch(app.ports.authError.send);
         });
-
 
         // Event.
         var eventsPath = firebase.database().ref('/events');
@@ -62,6 +60,7 @@ addEventListener(
             firebaseApp.auth()
                 .onAuthStateChanged(app.ports.authStateChanged.send);
         }, 1);
-    },
-    false
-);
+    }
+
+    addEventListener('load', startup, false);
+}());
