@@ -21,11 +21,11 @@ root router model =
             [ container
                 [ h1 [ class "hostname" ] [ text (Document.locationHost ()) ]
                 , row
-                    [ div [ class "col-xs-12 col-sm-8" ]
-                        [ h1 [] [ text "Vote-o-Matic" ] ]
-                    , div [ class "col-xs-12 col-sm-4" ]
+                    [ div [ class "col-xs-12 col-sm-9" ]
+                        [ h3 [] [ text "Vote-o-Matic" ] ]
+                    , div [ class "col-xs-12 col-sm-3" ]
                         [ button
-                            [ class "btn btn-lg btn-block btn-primary"
+                            [ class "btn btn-block btn-primary"
                             , onClick Authenticate
                             , disabled (canAuthenticate model)
                             ]

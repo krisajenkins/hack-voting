@@ -54,13 +54,13 @@ eventView user event =
         div []
             [ row
                 [ div [ class "col-xs-12 col-sm-6" ]
-                    [ votingFeedback userVote ]
-                ]
-            , row
-                [ div [ class "col-xs-12 col-sm-6" ]
                     [ optionsView userVote event ]
                 , div [ class "col-xs-12 col-sm-6" ]
                     [ votesView event ]
+                ]
+            , row
+                [ div [ class "col-xs-12 col-sm-6" ]
+                    [ votingFeedback userVote ]
                 ]
             ]
 
