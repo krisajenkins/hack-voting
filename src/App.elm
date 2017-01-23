@@ -8,17 +8,17 @@ module App exposing (main)
 import Navigation
 import Routing
 import State
+import Types exposing (..)
 import View
 
 
 {-| Run the application.
 -}
-main : Program Never
+main : Program Never Model Msg
 main =
-    Navigation.program (Navigation.makeParser (.hash >> Routing.hashParser))
-        { init = State.initialState
+    Navigation.program (Routing.pathParser >> UrlUpdate)
+        { init = State.init << Routing.pathParser
         , update = State.update
-        , urlUpdate = State.urlUpdate
         , subscriptions = State.subscriptions
-        , view = View.root Routing.toUri
+        , view = View.root Routing.pathRouter
         }

@@ -24,9 +24,8 @@ dist/%.png: static/%.png dist
 dist/%.ico: static/%.ico dist
 	cp $< $@
 
-.tested: $(shell find src test -type f -name '*.elm' -o -name '*.js')
-	@ elm-make test/Test.elm --yes --warn --output=$(TEMPFILE)
-	@ sed -i "" '1s/^/window = {};/' $(TEMPFILE)
-	@ node $(TEMPFILE)
+.tested: $(shell find src vendor tests -type f -name '*.elm' -o -name '*.js')
+	$(MAKE) -C tests
+	touch $@
 
 TEMPFILE := $(shell mktemp "$$TMPDIR/$$(uuidgen).js")

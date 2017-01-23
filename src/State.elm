@@ -9,34 +9,24 @@ import Response exposing (..)
 import Types exposing (..)
 
 
-initialState : View -> Response Model Msg
-initialState initialView =
+init : View -> Response Model Msg
+init view =
     ( { auth = Loading
       , events = Dict.empty
-      , view = initialView
+      , view = view
       }
     , Cmd.none
     )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.batch
-        [ Sub.map AuthResponse Firebase.authResponse
-        , model.events
-            |> Dict.map
-                (\eventId eventModel ->
-                    Sub.map (EventMsg eventId)
-                        (Event.subscriptions eventModel)
-                )
-            |> Dict.values
-            |> Sub.batch
-        ]
-
-
 update : Msg -> Model -> Response Model Msg
 update msg model =
     case msg of
+        UrlUpdate view ->
+            ( { model | view = view }
+            , Cmd.none
+            )
+
         Authenticate ->
             ( { model | auth = Loading }
             , Firebase.authenticate ()
@@ -49,17 +39,17 @@ update msg model =
                     , "projects"
                     ]
                         |> List.map Event.initialState
-                        |> indexBy (fst >> .id)
+                        |> indexBy (Tuple.first >> .id)
             in
                 ( { model
                     | auth = response
-                    , events = Dict.map (\k v -> fst v) events
+                    , events = Dict.map (\k v -> Tuple.first v) events
                   }
                 , events
                     |> Dict.map
                         (\eventId eventModel ->
                             Cmd.map (EventMsg eventId)
-                                (snd eventModel)
+                                (Tuple.second eventModel)
                         )
                     |> Dict.values
                     |> Cmd.batch
@@ -84,6 +74,16 @@ update msg model =
                     ( model, Cmd.none )
 
 
-urlUpdate : View -> Model -> Response Model Msg
-urlUpdate view model =
-    ( { model | view = view }, Cmd.none )
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Sub.map AuthResponse Firebase.authResponse
+        , model.events
+            |> Dict.map
+                (\eventId eventModel ->
+                    Sub.map (EventMsg eventId)
+                        (Event.subscriptions eventModel)
+                )
+            |> Dict.values
+            |> Sub.batch
+        ]

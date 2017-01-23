@@ -9,6 +9,7 @@ import RemoteData exposing (..)
 
 type Msg
     = Authenticate
+    | UrlUpdate View
     | AuthResponse (RemoteData Firebase.Error Firebase.User)
     | EventMsg EventId Event.Types.Msg
 

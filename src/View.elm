@@ -6,7 +6,6 @@ import Event.Types as Event exposing (EventId)
 import Event.View
 import Exts.Html.Bootstrap exposing (..)
 import Html exposing (..)
-import Html.App as Html
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import RemoteData exposing (..)

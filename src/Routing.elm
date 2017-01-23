@@ -1,6 +1,6 @@
-module Routing exposing (hashParser, hashRouter, parser, toPath, toUri, Router)
+module Routing exposing (Router, pathRouter, pathParser)
 
-import Exts.String exposing (removePrefix)
+import Navigation exposing (Location)
 import String exposing (split, join)
 import Types exposing (View(..))
 import UrlParser exposing (..)
@@ -10,34 +10,26 @@ type alias Router view =
     view -> String
 
 
-(<<=) : a -> Parser a b -> Parser (b -> c) c
-(<<=) =
-    UrlParser.format
-
-
-hashRouter : Router View
-hashRouter =
+pathRouter : Router View
+pathRouter =
     toPath >> join "/" >> (++) "#/"
 
 
-hashParser : String -> View
-hashParser hash =
-    hash
-        |> removePrefix "#/"
-        |> UrlParser.parse identity parser
-        |> Result.withDefault NotFound
+pathParser : Location -> View
+pathParser =
+    parseHash parser
+        >> Maybe.withDefault NotFound
 
 
 parser : Parser (View -> a) a
 parser =
     oneOf
-        [ EventView <<= (s "event" </> string)
-        , FrontPage <<= s ""
-        , FrontPage <<= s "#"
+        [ map FrontPage <| top
+        , map EventView <| s "event" </> string
         ]
 
 
-toPath : Types.View -> List String
+toPath : View -> List String
 toPath view =
     case view of
         FrontPage ->
@@ -48,13 +40,3 @@ toPath view =
 
         NotFound ->
             [ "404" ]
-
-
-toUri : View -> String
-toUri view =
-    case (toPath view |> String.join "/") of
-        "" ->
-            ""
-
-        str ->
-            "#/" ++ str
