@@ -1,0 +1,50 @@
+{
+    "lorenz": {
+        "description": "[The Lorenz Wheel](http://www.ace.gatech.edu/experiments2/2413/lorenz/fall02/) is a chaotic system. This is a chaotic description of it.",
+        "name": "Lorenz Wheel"
+    },
+    "doom": {
+        "description": "How much of the game Doom can you code up in 90 minutes? *Bonus points for creativity.*",
+        "name": "Minimum Viable Doom"
+    },
+    "huffman": {
+        "description": "[Huffman encoding](https://en.wikipedia.org/wiki/Huffman_coding) is one of the simplest text-compression algorithms, but it's also quite effective. Implement it.",
+        "name": "Huffman Encoding"
+    },
+    "merkle": {
+        "description": "A [Merkle tree](https://en.wikipedia.org/wiki/Merkle_tree) is a data-structure used in in peer-to-peer file transfer networks. Given a set of file blocks, you can compute if the whole file has arrived undamaged. You can also compute *some* integrity information even if you only have a few of the blocks. Implement the data-structure.",
+        "name": "Merkle Trees"
+    },
+    "pi": {
+        "description": "The Monte Carlo method is probably easiest, but there are plenty of others.",
+        "name": "Calculate Pi"
+    },
+    "rps": {
+        "description": "...Spock, Lizard.",
+        "name": "Multiplayer Rock, Paper, Scissors"
+    },
+    "sheeppen": {
+        "description": "Drop sheep at random points in a field. What's the smallest length of fencing you'd now need to enclose them all? ([Suggested Algorithm](https://en.wikipedia.org/wiki/Rotating_calipers).)",
+        "name": "Sheep Pen"
+    },
+    "brainfuck": {
+        "description": "[Brainf*ck](https://en.wikipedia.org/wiki/Brainfuck) is probably the simplest virtual machine a programmer can implement. Write one.",
+        "name": "Brainf*ck"
+    },
+    "church": {
+        "description": "[Church encoding](https://en.wikipedia.org/wiki/Church_encoding) is a novel way of dealing with arithmetic. Code it up.",
+        "name": "Church Encoding"
+    },
+    "qr": {
+        "description": "How do they work? Generate one!",
+        "name": "QR Codes"
+    },
+    "conway": {
+        "description": "The classic of cellular automata.",
+        "name": "Conway's Game of Life"
+    },
+    "trumpinmovies": {
+        "name": "Trump As A Movie",
+        "description": "Last I looked, Donald Trump's approval rating was the same as Rotten Tomatoes' rating of the film Mall Cop. We need to track this correlation in real-time."
+    }
+}

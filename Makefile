@@ -29,3 +29,11 @@ dist/%.ico: static/%.ico dist
 	touch $@
 
 TEMPFILE := $(shell mktemp "$$TMPDIR/$$(uuidgen).js")
+
+data/languages.json: FORCE
+	firebase database:get /events/languages/options | python -m json.tool > $@
+
+data/projects.json: FORCE
+	firebase database:get /events/projects/options | python -m json.tool > $@
+
+FORCE:

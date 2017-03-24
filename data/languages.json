@@ -1,0 +1,65 @@
+{
+    "c": {
+        "name": "C/C++"
+    },
+    "clojure": {
+        "name": "Clojure"
+    },
+    "elisp": {
+        "name": "Emacs Lisp"
+    },
+    "elm": {
+        "name": "Elm"
+    },
+    "erlang": {
+        "name": "Erlang"
+    },
+    "fsharp": {
+        "name": "F#"
+    },
+    "go": {
+        "name": "Go"
+    },
+    "groovy": {
+        "name": "Groovy"
+    },
+    "haskell": {
+        "name": "Haskell"
+    },
+    "java": {
+        "name": "Java"
+    },
+    "javascript": {
+        "name": "JavaScript"
+    },
+    "ocaml": {
+        "name": "OCaml"
+    },
+    "perl": {
+        "name": "Perl"
+    },
+    "php": {
+        "name": "PHP"
+    },
+    "purescript": {
+        "name": "PureScript"
+    },
+    "python": {
+        "name": "Python"
+    },
+    "ruby": {
+        "name": "Ruby"
+    },
+    "rust": {
+        "name": "Rust"
+    },
+    "scala": {
+        "name": "Scala"
+    },
+    "swift": {
+        "name": "Swift"
+    },
+    "tcl": {
+        "name": "TCL"
+    }
+}
