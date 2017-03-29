@@ -60,7 +60,7 @@
             firebaseApp.auth()
                 .onAuthStateChanged(app.ports.authStateChanged.send);
         }, 1);
-    }
+    };
 
     addEventListener('load', startup, false);
 }());
