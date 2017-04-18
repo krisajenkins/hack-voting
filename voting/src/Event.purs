@@ -212,10 +212,6 @@ votesView (Event event) =
                 well (voteBar event.options maxCount <$> tallied)
             ]
 
--- TODO Builtin in Arrays v4.            -
-sortWith :: forall a b. (Ord b) => (a -> b) -> Array a -> Array a
-sortWith = sortBy <<< comparing
-
 voteBar ::
   forall query.
   Map OptionId Option
