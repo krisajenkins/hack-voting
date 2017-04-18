@@ -72,7 +72,6 @@ eval (EventMsg eventId (VoteFor priority option next)) = do
         Right _ -> liftEff $ log $ "GOT Success"
       pure unit
   pure next
-eval (EventMsg eventId (VoteError _ next)) = pure next
 eval (EventMsg eventId (OptionError _ next)) = pure next
 eval (EventUpdated eventId (Left err) next) = do
   liftEff $ log $ "Got an error: " <> show err

@@ -1,26 +1,22 @@
 module Types where
 
-import Data.StrMap as StrMap
 import Routing.Match.Class
-import Data.Map as Map
 import Firebase as Firebase
 import Control.Alt ((<|>))
 import Control.Monad.Eff.Exception (Error)
-import Data.Argonaut (class DecodeJson, class EncodeJson, JObject, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
+import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
 import Data.Argonaut.Decode.Combinators ((.??))
-import Data.Bifunctor (lmap)
 import Data.Either (Either)
 import Data.Generic (class Generic, gShow)
 import Data.Map (Map)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(Nothing))
 import Data.Newtype (class Newtype, unwrap, wrap)
-import Data.StrMap (StrMap, toUnfoldable)
-import Data.Tuple (Tuple)
 import Firebase (Email, UID)
 import Network.RemoteData (RemoteData(..))
-import Prelude (class Eq, class Ord, class Show, bind, pure, ($), (*>), (<$), (<$>), (<>))
+import Prelude (class Eq, class Ord, class Show, Unit, bind, pure, ($), (*>), (<$), (<$>), (<>))
 import Routing.Match (Match)
 import Test.QuickCheck (class Arbitrary, arbitrary)
+import Utils (getFieldNullable, keyMap)
 
 ------------------------------------------------------------
 
@@ -64,8 +60,6 @@ instance decodeJsonOption :: DecodeJson Option where
       description <- object .?? "description"
       pure $ Option { owner: Nothing, name, description }
 
-
-
 ------------------------------------------------------------
 
 newtype Vote = Vote
@@ -87,16 +81,6 @@ instance decodeJsonVote :: DecodeJson Vote where
       second <- getFieldNullable object "second"
       third  <- getFieldNullable object "third"
       pure $ Vote { first, second, third }
-
--- TODO Move to lib.
-getFieldNullable :: forall a. DecodeJson a => JObject -> String -> Either String (Maybe a)
-getFieldNullable o s =
-  maybe
-    (pure Nothing)
-    decode
-    (StrMap.lookup s o)
-  where
-    decode json = decodeJson json
 
 instance encodeJsonVote :: EncodeJson Vote where
     encodeJson (Vote vote) =
@@ -147,21 +131,12 @@ instance decodeJsonEvent :: DecodeJson Event where
     decodeJson json = do
       object <- decodeJson json
       title <- object .? "title"
-      options <- convert <$> object .? "options"
-      votes <- convert <$> object .? "votes"
+      options <- keyMap <$> object .? "options"
+      votes <- keyMap <$> object .? "votes"
       pure $ Event { title
                    , options
                    , votes
                    }
-
-convert :: forall k v.
-  Ord k => Newtype k String => StrMap v -> Map k v
-convert sm = asMap
-    where arr :: Array (Tuple String v)
-          arr = toUnfoldable sm
-
-          asMap = Map.fromFoldable (lmap wrap <$> arr)
-
 
 data Priority
     = First
@@ -209,7 +184,6 @@ data EventMsg a
     | Ignore a
     | EventError Error a
     | VoteFor Priority (Maybe OptionId) a
-    | VoteError Error a
     | OptionError Error a
 
 bestTitle :: EventState -> String
