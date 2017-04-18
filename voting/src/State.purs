@@ -74,9 +74,6 @@ eval (EventMsg eventId (VoteFor priority option next)) = do
   pure next
 eval (EventMsg eventId (VoteError _ next)) = pure next
 eval (EventMsg eventId (OptionError _ next)) = pure next
--- eval (EventMsg eventId submsg) = do
---     event <- gets (_.events >>> Map.lookup eventId)
---     evalEventMsg event submsg
 eval (EventUpdated eventId (Left err) next) = do
   liftEff $ log $ "Got an error: " <> show err
   pure next
