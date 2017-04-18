@@ -16,6 +16,8 @@ module Firebase
        , getDbRef
        , getDbRefChild
        , onValue
+       , set
+       , getVal
        , signInAnonymously
        ) where
 
@@ -26,18 +28,21 @@ import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Exception (EXCEPTION, Error, error)
+import Data.Argonaut (Json)
 import Data.Either (Either(..))
-import Data.Foreign.Class (class IsForeign)
 import Data.Generic (class Generic, gShow)
 import Data.Maybe (Maybe)
+import Data.Newtype (class Newtype)
 import Data.Show (class Show)
 import FFI.Util (property)
-import Prelude (class Eq, Unit, bind, pure, unit, ($), (<$>), (<<<))
+import Prelude (class Eq, class Ord, Unit, bind, pure, unit, ($), (<$>), (<<<))
 
 newtype UID = UID String
 
 derive instance genericUID :: Generic UID
 derive instance eqUID :: Eq UID
+derive instance ordUID :: Ord UID
+derive instance newtypeUID :: Newtype UID _
 
 instance showUID :: Show UID where
   show = gShow
@@ -58,7 +63,7 @@ type Config =
   , storageBucket :: String
   }
 
-foreign import data FIREBASE :: !
+foreign import data FIREBASE :: Effect
 
 foreign import data App :: Type
 foreign import data User :: Type
@@ -73,8 +78,8 @@ foreign import initializeApp :: forall eff. Config -> Eff (err :: EXCEPTION, fir
 foreign import getAuth :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Auth
 foreign import getDb :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Db
 
-foreign import getDbRef :: Db -> String -> DbRef
-foreign import getDbRefChild :: DbRef -> String -> DbRef
+foreign import getDbRef :: String -> Db -> DbRef
+foreign import getDbRefChild :: String -> DbRef -> DbRef
 
 foreign import on_ :: forall eff.
   DbRef
@@ -82,6 +87,21 @@ foreign import on_ :: forall eff.
   -> (Snapshot -> Eff (firebase :: FIREBASE | eff) Unit)
   -> (FirebaseError -> Eff (firebase :: FIREBASE | eff) Unit)
   -> Eff (firebase :: FIREBASE | eff) Unit
+
+-- TODO Snapshot should be Json - it's easier and still true.
+-- TODO Make set into set_ and handle the promise internally, exposing an Aff.
+foreign import set_ :: forall eff.
+  DbRef
+  -> Json
+  -> Eff (firebase :: FIREBASE | eff) (Promise Unit)
+
+set :: forall eff.
+  DbRef
+  -> Json
+  -> Aff (firebase :: FIREBASE | eff) Unit
+set dbRef json = do
+  promise <- liftEff $ set_ dbRef json
+  makeAff $ promiseHandler promise
 
 onValue :: forall eff.
   DbRef
@@ -113,13 +133,19 @@ promiseHandler promise onError onSuccess = do
 foreign import data Promise :: Type -> Type
 
 foreign import andThen :: forall a eff.
-  Promise a -> (a -> Eff (firebase :: FIREBASE | eff) Unit) -> Eff (firebase :: FIREBASE | eff) Unit
+  Promise a
+  -> (a -> Eff (firebase :: FIREBASE | eff) Unit)
+  -> Eff (firebase :: FIREBASE | eff) Unit
 
 foreign import andCatch :: forall a eff.
-  Promise a -> (FirebaseError -> Eff (firebase :: FIREBASE | eff) Unit) -> Eff (firebase :: FIREBASE | eff) Unit
+  Promise a
+  -> (FirebaseError -> Eff (firebase :: FIREBASE | eff) Unit)
+  -> Eff (firebase :: FIREBASE | eff) Unit
 
 uid :: User -> UID
 uid user = UID $ property user "uid"
 
 email :: User -> Maybe Email
 email user = Email <$> property user "email"
+
+foreign import getVal :: forall eff. Snapshot -> Eff (firebase :: FIREBASE | eff) Json

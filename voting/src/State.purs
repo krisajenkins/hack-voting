@@ -1,30 +1,37 @@
 module State where
 
+import Types
 import Data.Map as Map
+import Firebase as Firebase
+import Network.RemoteData as RemoteData
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE, log, logShow)
+import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Exception (Error)
-import Control.Monad.State (modify)
+import Control.Monad.State (get, modify)
+import Data.Argonaut (decodeJson, encodeJson)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
+import Data.Lens (modifying, preview, set)
+import Data.Lens.At (at)
+import Data.Lens.Index (ix)
 import Data.Map (Map)
-import Event.State (init) as Event
-import Event.Types (EventId(..))
-import Event.Types (State) as Event
-import Halogen (ComponentDSL, raise)
-import Network.RemoteData (RemoteData(..))
-import Prelude (type (~>), bind, pure, ($))
-import Types (Message(..), Query(..), SomeUser, State, View(FrontPage))
+import Data.Maybe (Maybe(..), fromMaybe)
+import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
+import Halogen (ComponentDSL, liftAff, raise)
+import Lenses (_auth, _uid, _votes, toEvent, toLens)
+import Network.RemoteData (RemoteData(..), _success)
+import Prelude (type (~>), bind, pure, show, unit, ($), (<$>), (<<<), (<>), (>>>))
 
-init :: State
-init =
+init :: App -> State
+init app =
     { auth: NotAsked
     , events: Map.empty
     , view: FrontPage
+    , app: app
     }
 
-eval :: forall eff. Query ~> ComponentDSL State Query Message (Aff (console :: CONSOLE | eff))
+eval :: forall eff. Query ~> ComponentDSL State Query Message (Aff (console :: CONSOLE, firebase :: FIREBASE | eff))
 eval (UpdateView view next) = do
   modify (_ { view = view })
   pure next
@@ -34,76 +41,75 @@ eval (AuthResponse response next) = do
              , events = authEvents response state.events
              }
   raise $ WatchEvent $ EventId "projects"
+  raise $ WatchEvent $ EventId "languages"
   pure next
 eval (Authenticate next) = pure next
-eval (EventMsg _ _ next) = pure next
-eval (SomeEvent (Left err) next) = do
-  liftEff $ logShow err
+eval (EventMsg eventId (HeardEvent _ next)) = pure next
+eval (EventMsg eventId (Ignore next)) = pure next
+eval (EventMsg eventId (EventError _ next)) = pure next
+eval (EventMsg eventId (VoteFor priority option next)) = do
+  liftEff $ log $ "Got a vote: " <> show priority <> " - " <> show option
+  state <- get
+  case preview (_auth <<< _success <<< _uid) state of
+    Nothing -> do
+      liftEff $ log $ "No user, no vote."
+    Just uid -> do
+      liftEff $ log $ "User: " <> show uid
+      modifying
+        (toEvent eventId <<< _votes <<< at uid)
+        (setVote priority option)
+      let path = toEvent eventId <<< _votes <<< ix uid
+      newState <- get
+      let vote :: Maybe Vote
+          vote = preview path newState
+      firebaseDb <- liftEff $ Firebase.getDb state.app
+      let firebasePath = votePath eventId uid firebaseDb
+      liftAff $ Firebase.set firebasePath (encodeJson vote)
+      pure unit
+  -- TODO Send the vote to Firebase.
   pure next
-eval (SomeEvent (Right snapshot) next) = do
-  liftEff $ log "Got a snapshot"
+eval (EventMsg eventId (VoteError _ next)) = pure next
+eval (EventMsg eventId (OptionError _ next)) = pure next
+-- eval (EventMsg eventId submsg) = do
+--     event <- gets (_.events >>> Map.lookup eventId)
+--     evalEventMsg event submsg
+eval (EventUpdated eventId (Left err) next) = do
+  liftEff $ log $ "Got an error: " <> show err
   pure next
+eval (EventUpdated eventId (Right snapshot) next) = do
+  value <- liftEff $ do
+             value <- decodeJson <$> Firebase.getVal snapshot
+             log $ "Got a snapshot: " <> show value
+             pure value
+  modify (\state ->
+           state { events = Map.update (_ { event = RemoteData.fromEither value } >>> Just)
+                            eventId
+                            state.events })
+  pure next
+
+
+votePath :: EventId -> UID -> Db -> DbRef
+votePath (EventId eventId) (UID uid) =
+  getDbRef "events"
+  >>> getDbRefChild eventId
+  >>> getDbRefChild "votes"
+  >>> getDbRefChild uid
+
+
+setVote :: Priority -> Maybe OptionId -> Maybe Vote -> Maybe Vote
+setVote priority option =
+  Just <<< set (toLens priority) option <<< fromMaybe initialVote
 
 authEvents ::
   RemoteData Error SomeUser
-  -> Map EventId Event.State
-  -> Map EventId Event.State
+  -> Map EventId EventState
+  -> Map EventId EventState
 authEvents (Success user) events = do
   foldl create events
     [ EventId "languages"
     , EventId "projects"
     ]
   where
-    create :: Map EventId Event.State -> EventId -> Map EventId Event.State
-    create map eventId = Map.insert eventId (Event.init eventId) map
+    create :: Map EventId EventState -> EventId -> Map EventId EventState
+    create map eventId = Map.insert eventId (initEventState eventId) map
 authEvents _ m = m
-
-
--- TODO When successfully authenticated, subscribe to the "languages"
--- and "projects" events.
-
-    --     Authenticate ->
-    --         ( { model | auth = Loading }
-    --         , Firebase.authenticate ()
-    --         )
-
-    --     AuthResponse ((Success _) as response) ->
-    --         let
-    --             events =
-    --                 [ "languages"
-    --                 , "projects"
-    --                 ]
-    --                     |> List.map Event.initialState
-    --                     |> indexBy (Tuple.first >> .id)
-    --         in
-    --             ( { model
-    --                 | auth = response
-    --                 , events = Dict.map (\k v -> Tuple.first v) events
-    --               }
-    --             , events
-    --                 |> Dict.map
-    --                     (\eventId eventModel ->
-    --                         Cmd.map (EventMsg eventId)
-    --                             (Tuple.second eventModel)
-    --                     )
-    --                 |> Dict.values
-    --                 |> Cmd.batch
-    --             )
-
-    --     AuthResponse response ->
-    --         ( { model | auth = response }
-    --         , Cmd.none
-    --         )
-
-    --     EventMsg eventId submsg ->
-    --         case ( model.auth, Dict.get eventId model.events ) of
-    --             ( Success user, Just eventModel ) ->
-    --                 Event.update user submsg eventModel
-    --                     |> mapModel
-    --                         (\eventModel ->
-    --                             { model | events = Dict.insert eventId eventModel model.events }
-    --                         )
-    --                     |> mapCmd (EventMsg eventId)
-
-    --             _ ->
-    --                 ( model, Cmd.none )

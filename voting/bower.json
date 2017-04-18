@@ -7,8 +7,6 @@
     "output"
   ],
   "dependencies": {
-  },
-  "devDependencies": {
     "purescript-prelude": "^2.5.0",
     "purescript-console": "^2.0.0",
     "purescript-halogen": "^1.2.1",
@@ -18,9 +16,18 @@
     "purescript-profunctor-lenses": "^2.6.0",
     "purescript-ffi-utils": "^1.4.0",
     "purescript-routing": "^4.0.0",
+    "purescript-foreign-generic": "^3.0.0",
+    "purescript-markdown": "^9.0.0",
+    "purescript-css": "^2.1.0",
+    "purescript-halogen-css": "^5.0.0",
+    "purescript-argonaut": "^2.0.0",
+    "purescript-markdown-halogen": "^5.0.0",
+    "purescript-aff-coroutines": "^4.0.0"
+  },
+  "devDependencies": {
     "purescript-debug": "^2.0.0",
-    "purescript-aff-coroutines": "^4.0.0",
     "purescript-psci-support": "^2.0.0",
-    "purescript-test-unit": "^10.1.0"
+    "purescript-test-unit": "^10.1.0",
+    "purescript-quickcheck": "3.1.1"
   }
 }

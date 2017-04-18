@@ -1,15 +1,17 @@
-"use strict";
+/*eslint-env node*/
+/*global firebase*/
+'use strict';
 
 exports.initializeApp = function (config) {
     return function () {
-        console.log("Config", config);
+        console.log('Config', config);
         return firebase.initializeApp(config);
     };
 };
 
 // We don't actually use the app argument, but requiring it is a way
 // to require that the app has been initialised.
-exports.getAuth = function (app) {
+exports.getAuth = function (appIgnored) {
     return function () {
         return firebase.auth();
     };
@@ -17,21 +19,30 @@ exports.getAuth = function (app) {
 
 // We don't actually use the app argument, but requiring it is a way
 // to require that the app has been initialised.
-exports.getDb = function (app) {
+exports.getDb = function (appIgnored) {
     return function () {
         return firebase.database();
     };
 };
 
-exports.getDbRef = function (db) {
-    return function (name) {
+exports.getDbRef = function (name) {
+    return function (db) {
         return db.ref(name);
     };
 };
 
-exports.getDbRefChild = function (dbRef) {
-    return function (name) {
+exports.getDbRefChild = function (name) {
+    return function (dbRef) {
         return dbRef.child(name);
+    };
+};
+
+exports.set_ = function (dbRef) {
+    return function (value) {
+        return function () {
+            console.log("Sending to FireBase", dbRef.key, dbRef.toString(), value);
+            return dbRef.set(value);
+        };
     };
 };
 
@@ -40,18 +51,16 @@ exports.on_ = function (dbRef) {
         return function (successCallback) {
             return function (errorsCallback) {
                 return function() {
-                    console.log("Listening", dbRef, eventName, dbRef.toString());
                     dbRef.on(
                         eventName,
                         function (snapshot) {
-                            console.log("Success", snapshot, snapshot.val());
                             return successCallback(snapshot)();
                         },
                         function (error) {
-                            console.log("Error", error);
-                            return errorCallback(error)();
+                            return errorsCallback(error)();
                         }
                     );
+
                     return {};
                 };
             };
@@ -59,9 +68,15 @@ exports.on_ = function (dbRef) {
     };
 };
 
+exports.getVal = function (snapshot) {
+    return function () {
+        return snapshot.val();
+    };
+};
+
 exports.signInAnonymously_ = function (auth) {
     return function () {
-        console.log("Signin auth", auth);
+        console.log('Signin auth', auth);
         return auth.signInAnonymously();
     };
 };
@@ -70,8 +85,7 @@ exports.andThen = function (promise) {
     return function (callback) {
         return function () {
             promise.then(function (v) {
-                var eff = callback(v);
-                eff();
+                callback(v)();
             });
         };
     };
@@ -81,9 +95,7 @@ exports.andCatch = function (promise) {
     return function (callback) {
         return function () {
             promise.catch(function (err) {
-                console.log("Err", err);
-                var eff = callback(err.message);
-                eff();
+                callback(err.message)();
             });
         };
     };

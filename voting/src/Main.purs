@@ -12,8 +12,8 @@ import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION, Error)
 import DOM (DOM)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
-import Event.Types (EventId(..))
 import Firebase (App, FIREBASE, email, initializeApp, signInAnonymously, uid)
 import Halogen (Component, action, component, lift, liftEff)
 import Halogen.Aff (HalogenEffects, awaitBody, runHalogenAff)
@@ -25,9 +25,10 @@ import Types (Message(..), Query(..), SomeUser(SomeUser), View, pathRouter, rout
 
 -- | TODO http://stackoverflow.com/questions/38370322/purescript-halogen-and-websockets
 root :: forall aff.
-  Component HTML Query Unit Message (Aff (dom :: DOM, console :: CONSOLE | aff))
-root = component
-  { initialState: const State.init
+  App
+  -> Component HTML Query Unit Message (Aff (firebase :: FIREBASE, dom :: DOM, console :: CONSOLE | aff))
+root app = component
+  { initialState: const (State.init app)
   , render: View.render pathRouter
   , eval: State.eval
   , receiver: const Nothing
@@ -83,20 +84,19 @@ firebaseMessageHandlerThing :: forall eff.
   -> Consumer Message (Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff))) Unit
 firebaseMessageHandlerThing firebaseApp driver = consumer $ foo firebaseApp driver
 
-
 foo :: forall eff a.
   App
   -> (Query ~> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)))
   -> Message
   -> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)) (Maybe a)
-foo firebaseApp driver (WatchEvent (EventId eventId)) = do
+foo firebaseApp driver (WatchEvent eventId) = do
   firebaseDb <- liftEff $ Firebase.getDb firebaseApp
-  let eventsRef = Firebase.getDbRef firebaseDb "events"
-  let eventRef = Firebase.getDbRefChild eventsRef eventId
+  let eventsRef = Firebase.getDbRef "events" firebaseDb
+  let eventRef = Firebase.getDbRefChild (unwrap eventId) eventsRef
   forkAff $ runProcess $ connect
       (Firebase.onValue eventRef)
       (consumer \msg -> do
-           driver $ action $ SomeEvent msg
+           driver $ action $ EventUpdated eventId msg
            pure Nothing)
   logShow eventId
   pure Nothing
@@ -105,7 +105,7 @@ main :: Eff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE)) Unit
 main = runHalogenAff do
   body <- awaitBody
   firebaseApp <- liftEff $ initializeApp firebaseConfig
-  driver <- runUI root unit body
+  driver <- runUI (root firebaseApp) unit body
 
   forkAff $ runProcess $ connect (firebaseAuthProducer firebaseApp) (firebaseAuthConsumer driver.query)
   forkAff $ driver.subscribe (firebaseMessageHandlerThing firebaseApp driver.query)

@@ -20,3 +20,12 @@ dist/app.min.js: dist/app.js
 
 .static: $(shell find static/ -type f)
 	rsync -r static/ dist/
+
+wtest:
+	pulp --before clear --watch test
+
+wbuild:
+	pulp --before clear --watch build
+
+wbrowse:
+	pulp --before clear --watch browserify --to dist/app.js 
