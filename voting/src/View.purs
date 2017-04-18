@@ -13,7 +13,9 @@ import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (classes, disabled, href)
 import Network.RemoteData (RemoteData(..))
 import Prelude (class Show, show, ($), (<$>))
-import Types (EventId, EventState, Query(Authenticate), Router, SomeUser, State, View(NotFound, EventView, FrontPage), bestTitle)
+import Types (EventState, Query(..), SomeUser, State, bestTitle)
+import Routes (Router, View(..))
+import Event.Types (EventId)
 
 render :: Router View -> State -> ComponentHTML Query
 render router state =

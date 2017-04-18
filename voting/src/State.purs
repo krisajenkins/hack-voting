@@ -19,9 +19,21 @@ import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
 import Halogen (ComponentDSL, liftAff, raise)
-import Lenses (_auth, _events, _uid, _voteError, _votes, toEvent, toLens)
+import Lenses (_auth, _events, _uid, _voteError, toEvent, toLens)
+import Event.Lenses (_votes)
+import Event.Types (EventId(..), OptionId, Priority, Vote, initialVote)
+import Routes (View(..))
 import Network.RemoteData (RemoteData(..), _success)
 import Prelude (type (~>), Unit, bind, const, pure, show, unit, ($), (<$>), (<<<), (<>), (>>>))
+
+initEventState :: EventId -> EventState
+initEventState eventId =
+  { id: eventId
+  , event: Loading
+  , eventError: Nothing
+  , voteError: Nothing
+  , optionError: Nothing
+  }
 
 init :: App -> State
 init app =

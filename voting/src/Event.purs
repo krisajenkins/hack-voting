@@ -27,7 +27,8 @@ import Halogen.HTML.Properties (class_, classes)
 import Network.RemoteData (RemoteData(..))
 import Prelude (class Monad, class Ord, comparing, id, map, negate, not, show, (#), ($), (*), (+), (/), (<$>), (<<<), (==), (>>>))
 import Text.Markdown.SlamDown.Parser (parseMd)
-import Types (Event(..), EventMsg(..), EventState, Option(..), OptionId, Priority(..), Query(..), SomeUser(..), Vote, initialVote, priorities, voteN)
+import Types (EventMsg(..), Query(..), SomeUser(..))
+import Event.Types (Event(..), EventState, Option(..), OptionId, Priority(..), Vote, initialVote, priorities, voteN)
 
 render :: SomeUser -> EventState -> ComponentHTML Query
 render user state =

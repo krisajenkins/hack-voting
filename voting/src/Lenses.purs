@@ -1,15 +1,16 @@
 module Lenses where
 
-import Types
 import Control.Monad.Eff.Exception (Error)
 import Data.Lens (Lens', Traversal', lens')
 import Data.Lens.Index (ix)
-import Data.Map (Map)
 import Data.Maybe (Maybe)
 import Data.Tuple (Tuple(..))
+import Event.Lenses (_first, _second, _third, _votes)
+import Event.Types (Event, EventId, OptionId, Priority(Third, Second, First), Vote)
 import Firebase (UID)
 import Network.RemoteData (_success)
 import Prelude ((<<<))
+import Types
 
 _events :: forall a b. Lens' {events :: b | a} b
 _events = lens' (\record -> Tuple record.events (\events -> record {events = events}))
@@ -26,20 +27,8 @@ _uid :: Lens' SomeUser UID
 _uid = lens' (\(SomeUser someUser) -> Tuple someUser.uid (\uid -> SomeUser (someUser {uid = uid})))
 
 
-_votes :: Lens' Event (Map UID Vote)
-_votes = lens' (\(Event event) -> Tuple event.votes (\votes -> Event (event {votes = votes})))
-
 _voteError :: Lens' EventState (Maybe Error)
 _voteError = lens' (\eventState -> Tuple eventState.voteError (\voteError -> eventState {voteError = voteError}))
-
-_first :: Lens' Vote (Maybe OptionId)
-_first = lens' (\(Vote record) -> Tuple record.first (\first -> Vote (record {first = first})))
-
-_second :: Lens' Vote (Maybe OptionId)
-_second = lens' (\(Vote record) -> Tuple record.second (\second -> Vote (record {second = second})))
-
-_third :: Lens' Vote (Maybe OptionId)
-_third = lens' (\(Vote record) -> Tuple record.third (\third -> Vote (record {third = third})))
 
 toEvent :: EventId -> Traversal' State Event
 toEvent eventId = _events <<< ix eventId <<< _event <<< _success

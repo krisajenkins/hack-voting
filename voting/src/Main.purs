@@ -21,7 +21,8 @@ import Halogen.HTML (HTML)
 import Halogen.VDom.Driver (runUI)
 import Network.RemoteData (RemoteData(..), fromEither)
 import Routing (matchesAff)
-import Types (Message(..), Query(..), SomeUser(SomeUser), View, pathRouter, routing)
+import Types (Message(..), Query(..), SomeUser(..))
+import Routes (View, pathRouter, routing)
 
 -- | TODO http://stackoverflow.com/questions/38370322/purescript-halogen-and-websockets
 root :: forall aff.
