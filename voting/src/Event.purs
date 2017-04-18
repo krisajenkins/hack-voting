@@ -21,7 +21,7 @@ import Data.Tuple (Tuple(Tuple), snd)
 import Firebase (UID)
 import Halogen (ClassName(..), ComponentHTML)
 import Halogen.HTML (HTML, button, div, div_, h2_, h3_, h4_, i_, p_, span, span_, sup_, text)
-import Halogen.HTML.CSS (style)
+import Halogen.HTML.CSS as CSS
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (class_, classes)
 import Network.RemoteData (RemoteData(..))
@@ -240,7 +240,8 @@ voteBar options maxCount (Tuple optionId voteCount) =
                 ]
             , div
                 [ class_ $ ClassName "bar"
-                , style $ width $ pct $ (toNumber voteCount / toNumber maxCount) * 100.0
+                , CSS.style do
+                    width $ pct $ (toNumber voteCount / toNumber maxCount) * 100.0
                 ]
                 []
             ]
