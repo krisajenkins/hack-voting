@@ -4,17 +4,16 @@
 
 exports.andCatch = function (promise, callback) {
     return function () {
-        console.log("Registering catch callback.");
-        promise.catch(function (err) {
-            callback(err)();
+        promise.catch(function (error) {
+            callback(error)();
         });
     };
 };
 
 exports.andThen = function (promise, callback) {
     return function () {
-        promise.then(function (v) {
-            callback(v)();
+        promise.then(function (value) {
+            callback(value)();
         });
     };
 };

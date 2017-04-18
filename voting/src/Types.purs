@@ -2,11 +2,10 @@ module Types where
 
 import Firebase as Firebase
 import Control.Monad.Eff.Exception (Error)
-import Data.Argonaut (Json)
 import Data.Generic (class Generic, gShow)
 import Data.Map (Map)
 import Data.Maybe (Maybe)
-import Event.Types (EventId, EventState, OptionId, Priority)
+import Event.Types (EventId, EventMsg, EventState)
 import Firebase (Email, UID)
 import Network.RemoteData (RemoteData)
 import Prelude (class Show)
@@ -26,15 +25,11 @@ instance showSomeUser :: Show SomeUser where
 
 ------------------------------------------------------------
 
-data EventMsg a
-    = VoteFor Priority (Maybe OptionId) a
-
 data Query a
     = UpdateView View a
     | Authenticate a
     | AuthResponse (RemoteData Error SomeUser) a
-    | EventMsg EventId (EventMsg a)
-    | EventUpdated EventId (RemoteData Error Json) a
+    | EventMsg EventId EventMsg a
 
 data Message
   = WatchEvent EventId

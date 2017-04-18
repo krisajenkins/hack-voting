@@ -19,7 +19,7 @@ import Data.Lens.Index (ix)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Event.Lenses (_event, _voteError, _votes, toLens)
-import Event.Types (EventId(..), EventState, OptionId, Priority, Vote, initialVote)
+import Event.Types (EventId(..), EventMsg(..), EventState, OptionId, Priority, Vote, initialVote)
 import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
 import Halogen (ComponentDSL, liftAff, raise)
 import Lenses (_auth, _events, _uid, toEvent)
@@ -57,7 +57,7 @@ eval (AuthResponse response next) = do
   raise $ WatchEvent $ EventId "languages"
   pure next
 eval (Authenticate next) = pure next
-eval (EventMsg eventId (VoteFor priority option next)) = do
+eval (EventMsg eventId (VoteFor priority option) next) = do
   liftEff $ log $ "Got a vote: " <> show priority <> " - " <> show option
   state <- get
   -- TODO Refactor. This is a mess!
@@ -87,11 +87,10 @@ eval (EventMsg eventId (VoteFor priority option next)) = do
         Right _ -> Nothing
 
   pure next
-eval (EventUpdated eventId response next) = do
+eval (EventMsg eventId (EventUpdated response) next) = do
   assign (_events <<< ix eventId <<< _event)
     (lmap show response >>= (decodeJson >>> RemoteData.fromEither))
   pure next
-
 
 voteDbRef :: EventId -> UID -> Db -> DbRef
 voteDbRef (EventId eventId) (UID uid) =
@@ -99,7 +98,6 @@ voteDbRef (EventId eventId) (UID uid) =
   >>> getDbRefChild eventId
   >>> getDbRefChild "votes"
   >>> getDbRefChild uid
-
 
 setVote :: Priority -> Maybe OptionId -> Maybe Vote -> Maybe Vote
 setVote priority option =

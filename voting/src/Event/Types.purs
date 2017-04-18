@@ -2,7 +2,7 @@ module Event.Types where
 
 import Data.Map as Map
 import Control.Monad.Eff.Exception (Error)
-import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
 import Data.Argonaut.Decode.Combinators ((.??))
 import Data.Foldable (foldl)
 import Data.Generic (class Generic, gShow)
@@ -170,6 +170,10 @@ voteN (Vote vote) priority =
             vote.third
 
 ------------------------------------------------------------
+
+data EventMsg
+    = VoteFor Priority (Maybe OptionId)
+    | EventUpdated (RemoteData Error Json)
 
 type EventState =
     { id :: EventId

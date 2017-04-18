@@ -1,19 +1,19 @@
 module View where
 
+import Event.Types
+import Data.Map as Map
+import Event.View as Event
 import Bootstrap (alert, btn, col, container, navTags, pullRight, row)
 import Control.Monad.Eff.Exception (Error)
 import Data.Array (fromFoldable)
 import Data.Map (Map)
-import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Event as Event
-import Event.Types
-import Halogen (ComponentHTML)
+import Halogen (ComponentHTML, action)
 import Halogen.HTML (ClassName(ClassName), HTML, a, button, div, div_, h1, h2, h2_, h3_, h4_, header_, i_, li_, text, ul)
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (classes, disabled, href)
 import Network.RemoteData (RemoteData(..))
-import Prelude (show, ($), (<$>))
+import Prelude (show, unit, ($), (<$>), (<<<))
 import Routes (Router, View(..))
 import Types (Query(..), SomeUser, State)
 
@@ -84,7 +84,7 @@ mainView user events (EventView eventId) = eventView user $ Map.lookup eventId e
 mainView _ _ (NotFound _) = notFoundView
 
 eventView :: SomeUser -> Maybe EventState -> ComponentHTML Query
-eventView user (Just event) = Event.render user event
+eventView user (Just event) = (action <<< EventMsg event.id) <$> Event.root user event
 eventView _ Nothing = notFoundView
 
 ------------------------------------------------------------

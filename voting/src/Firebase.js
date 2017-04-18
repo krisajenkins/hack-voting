@@ -4,7 +4,6 @@
 
 exports.initializeApp = function (config) {
     return function () {
-        console.log('Config', config);
         return firebase.initializeApp(config);
     };
 };
@@ -35,7 +34,6 @@ exports.getDbRefChild_ = function (name, dbRef) {
 
 exports.set_ = function (dbRef, value) {
     return function () {
-        console.log("Sending to FireBase", dbRef.key, dbRef.toString(), value);
         return dbRef.set(value);
     };
 };
@@ -64,7 +62,6 @@ exports.getVal = function (snapshot) {
 
 exports.signInAnonymously_ = function (auth) {
     return function () {
-        console.log('Signin auth', auth);
         return auth.signInAnonymously();
     };
 };
