@@ -2,20 +2,6 @@
 /*global firebase*/
 'use strict';
 
-exports.initializeApp = function (config) {
-    return function () {
-        return firebase.initializeApp(config);
-    };
-};
-
-// We don't actually use the app argument, but requiring it is a way
-// to require that the app has been initialised.
-exports.getAuth = function (appIgnored) {
-    return function () {
-        return firebase.auth();
-    };
-};
-
 // We don't actually use the app argument, but requiring it is a way
 // to require that the app has been initialised.
 exports.getDb = function (appIgnored) {
@@ -57,11 +43,5 @@ exports.on_ = function (dbRef, eventName, successCallback, errorsCallback) {
 exports.getVal = function (snapshot) {
     return function () {
         return snapshot.val();
-    };
-};
-
-exports.signInAnonymously_ = function (auth) {
-    return function () {
-        return auth.signInAnonymously();
     };
 };

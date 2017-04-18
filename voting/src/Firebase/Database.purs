@@ -1,0 +1,77 @@
+module Firebase.Database
+       ( Db
+       , DbRef
+       , getDb
+       , getDbRef
+       , getDbRefChild
+       , getVal
+       , onValue
+       , set
+       , Snapshot
+       )
+       where
+
+import Firebase.Core
+import Control.Bind (bind)
+import Control.Coroutine (Producer)
+import Control.Coroutine.Aff (produce)
+import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.AVar (AVAR)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Exception (Error)
+import Data.Argonaut (Json)
+import Data.Either (Either(..))
+import Data.Function (($), (<<<))
+import Data.Function.Uncurried (Fn2, Fn4, runFn2, runFn4)
+import Data.Unit (Unit)
+import Firebase.Promise (Promise, runPromise)
+
+foreign import data Db :: Type
+foreign import data DbRef :: Type
+foreign import data Ref :: Type
+foreign import data Snapshot :: Type
+foreign import getDb :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Db
+
+foreign import getDbRef_ :: Fn2 String Db DbRef
+foreign import getDbRefChild_ :: Fn2 String DbRef DbRef
+
+getDbRef :: String -> Db -> DbRef
+getDbRef = runFn2 getDbRef_
+
+getDbRefChild :: String -> DbRef -> DbRef
+getDbRefChild = runFn2 getDbRefChild_
+
+foreign import on_ ::
+  forall eff.
+  Fn4
+    DbRef
+    String
+    (Snapshot -> Eff (firebase :: FIREBASE | eff) Unit)
+    (Error -> Eff (firebase :: FIREBASE | eff) Unit)
+    (Eff (firebase :: FIREBASE | eff) Unit)
+
+foreign import set_ ::
+  forall eff. Fn2 DbRef Json (Eff (firebase :: FIREBASE | eff) (Promise Unit))
+
+set :: forall eff.
+  DbRef
+  -> Json
+  -> Aff (firebase :: FIREBASE | eff) (Either Error Unit)
+set dbRef json = do
+  promise <- liftEff $ runFn2 set_ dbRef json
+  runPromise promise
+onValue :: forall eff.
+  DbRef
+  -> Producer
+       (Either Error Snapshot)
+       (Aff (avar :: AVAR, firebase :: FIREBASE | eff)) Unit
+onValue dbRef = produce \emit -> do
+  runFn4 on_ dbRef "value"
+    (emit <<< Left <<< Right)
+    (emit <<< Left <<< Left)
+
+foreign import getVal ::
+  forall eff.
+  Snapshot
+  -> Eff (firebase :: FIREBASE | eff) Json

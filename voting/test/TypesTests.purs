@@ -1,13 +1,14 @@
 module TypesTests (all) where
 
-import Types
 import Control.Monad.Eff.Random (RANDOM)
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson)
 import Data.Argonaut.Core (jsonEmptyObject)
 import Data.Either (Either(..))
 import Data.Traversable (sequence_)
 import Data.Tuple (Tuple(..))
+import Event.Types (EventId(EventId), OptionId, Vote, initialVote)
 import Prelude (class Eq, class Show, bind, show, ($), (<$>), (<>), (==))
+import Routes (View(..), routing)
 import Routing (match)
 import Test.QuickCheck (Result, (<?>))
 import Test.Unit (TestSuite, suite, test)

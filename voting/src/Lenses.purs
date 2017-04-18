@@ -22,13 +22,14 @@ _uid :: Lens' SomeUser UID
 _uid = lens' (\(SomeUser someUser) -> Tuple someUser.uid (\uid -> SomeUser (someUser {uid = uid})))
 
 toEvent :: EventId -> Traversal' State Event
-toEvent eventId = _events <<< ix eventId <<< _event <<< _success
-
-toVote :: EventId -> UID -> Traversal' State Vote
-toVote eventId uid =
+toEvent eventId =
   _events
   <<< ix eventId
   <<< _event
   <<< _success
+
+toVote :: EventId -> UID -> Traversal' State Vote
+toVote eventId uid =
+  toEvent eventId
   <<< _votes
   <<< ix uid

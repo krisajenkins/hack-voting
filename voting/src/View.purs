@@ -13,7 +13,7 @@ import Halogen.HTML (ClassName(ClassName), HTML, a, button, div, div_, h1, h2, h
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (classes, disabled, href)
 import Network.RemoteData (RemoteData(..))
-import Prelude (show, unit, ($), (<$>), (<<<))
+import Prelude (show, ($), (<$>), (<<<))
 import Routes (Router, View(..))
 import Types (Query(..), SomeUser, State)
 
