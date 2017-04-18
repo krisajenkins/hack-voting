@@ -80,23 +80,3 @@ exports.signInAnonymously_ = function (auth) {
         return auth.signInAnonymously();
     };
 };
-
-exports.andThen = function (promise) {
-    return function (callback) {
-        return function () {
-            promise.then(function (v) {
-                callback(v)();
-            });
-        };
-    };
-};
-
-exports.andCatch = function (promise) {
-    return function (callback) {
-        return function () {
-            promise.catch(function (err) {
-                callback(err.message)();
-            });
-        };
-    };
-};

@@ -2,8 +2,7 @@ module Firebase
        ( User
        , UID(..)
        , Email
-       , FIREBASE
-       , FirebaseError
+       , module Firebase.Core
        , Config
        , App
        , Db
@@ -27,7 +26,7 @@ import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Exception (EXCEPTION, Error, error)
+import Control.Monad.Eff.Exception (EXCEPTION)
 import Data.Argonaut (Json)
 import Data.Either (Either(..))
 import Data.Generic (class Generic, gShow)
@@ -35,7 +34,9 @@ import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
 import Data.Show (class Show)
 import FFI.Util (property)
-import Prelude (class Eq, class Ord, Unit, bind, pure, unit, ($), (<$>), (<<<))
+import Firebase.Core (FIREBASE, FirebaseError)
+import Firebase.Promise (Promise, promiseHandler)
+import Prelude (class Eq, class Ord, Unit, bind, ($), (<$>))
 
 newtype UID = UID String
 
@@ -54,16 +55,12 @@ derive instance genericEmail :: Generic Email
 instance showEmail :: Show Email where
   show = gShow
 
-type FirebaseError = String
-
 type Config =
   { apiKey :: String
   , authDomain :: String
   , databaseURL :: String
   , storageBucket :: String
   }
-
-foreign import data FIREBASE :: Effect
 
 foreign import data App :: Type
 foreign import data User :: Type
@@ -119,28 +116,6 @@ signInAnonymously app = do
   auth <- liftEff $ getAuth app
   promise <- liftEff $ signInAnonymously_ auth
   makeAff $ promiseHandler promise
-
-promiseHandler :: forall eff a.
-  Promise a
-  -> (Error -> Eff (firebase :: FIREBASE | eff) Unit)
-  -> (a -> Eff (firebase :: FIREBASE | eff) Unit)
-  -> Eff (firebase :: FIREBASE | eff) Unit
-promiseHandler promise onError onSuccess = do
-  andThen promise onSuccess
-  andCatch promise (onError <<< error)
-  pure unit
-
-foreign import data Promise :: Type -> Type
-
-foreign import andThen :: forall a eff.
-  Promise a
-  -> (a -> Eff (firebase :: FIREBASE | eff) Unit)
-  -> Eff (firebase :: FIREBASE | eff) Unit
-
-foreign import andCatch :: forall a eff.
-  Promise a
-  -> (FirebaseError -> Eff (firebase :: FIREBASE | eff) Unit)
-  -> Eff (firebase :: FIREBASE | eff) Unit
 
 uid :: User -> UID
 uid user = UID $ property user "uid"
