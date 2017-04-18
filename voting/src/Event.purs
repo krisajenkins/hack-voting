@@ -2,8 +2,9 @@ module Event where
 
 import Text.Markdown.SlamDown.Syntax
 import Data.Map as Map
+import Halogen.HTML.CSS as CSS
 import Slamdown as Slamdown
-import Bootstrap (alert, btnGroup, classList, col, empty, listGroup, listGroupItem, pullRight, row, well)
+import Bootstrap (alert, badge, btnGroup, classList, col, empty, listGroup, listGroupItem, pullRight, row, well)
 import CSS.Geometry (width)
 import CSS.Size (pct)
 import Control.Monad.Eff.Exception (Error)
@@ -18,17 +19,16 @@ import Data.Monoid (mempty)
 import Data.Newtype (unwrap)
 import Data.Traversable (maximum, traverse)
 import Data.Tuple (Tuple(Tuple), snd)
+import Event.Types (Event(..), EventState, Option(..), OptionId, Priority(..), Vote, initialVote, priorities, voteN)
 import Firebase (UID)
 import Halogen (ClassName(..), ComponentHTML)
 import Halogen.HTML (HTML, button, div, div_, h2_, h3_, h4_, i_, p_, span, span_, sup_, text)
-import Halogen.HTML.CSS as CSS
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (class_, classes)
 import Network.RemoteData (RemoteData(..))
 import Prelude (class Monad, class Ord, comparing, id, map, negate, not, show, (#), ($), (*), (+), (/), (<$>), (<<<), (==), (>>>))
 import Text.Markdown.SlamDown.Parser (parseMd)
 import Types (EventMsg(..), Query(..), SomeUser(..))
-import Event.Types (Event(..), EventState, Option(..), OptionId, Priority(..), Vote, initialVote, priorities, voteN)
 
 render :: SomeUser -> EventState -> ComponentHTML Query
 render user state =
@@ -242,9 +242,3 @@ voteBar options maxCount (Tuple optionId voteCount) =
                 ]
                 []
             ]
-
-
-badge :: forall query. Int -> ComponentHTML query
-badge n =
-  span [ class_ $ ClassName "badge" ]
-    [ text $ show n ]

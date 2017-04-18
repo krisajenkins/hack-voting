@@ -1,9 +1,10 @@
 module Bootstrap where
 
 import Data.Array (filter)
+import Data.Show (show)
 import Data.Tuple (Tuple, fst, snd)
 import Halogen.HTML (ClassName(ClassName), HTML, IProp, div, span, text)
-import Halogen.HTML.Properties (classes)
+import Halogen.HTML.Properties (class_, classes)
 import Prelude (map, ($))
 
 container :: forall p i. Array (HTML p i) -> HTML p i
@@ -86,3 +87,8 @@ classList :: forall r i.
   -> IProp ("class" :: String | r) i
 classList items =
   classes $ map fst $ filter snd items
+
+badge :: forall p i. Int -> HTML p i
+badge n =
+  span [ class_ $ ClassName "badge" ]
+    [ text $ show n ]
