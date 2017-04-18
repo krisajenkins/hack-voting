@@ -1,4 +1,4 @@
-module Slamdown (renderBlock) where
+module Slamdown (render) where
 
 import Data.Array (fromFoldable)
 import Data.Foldable (foldMap)
@@ -9,7 +9,7 @@ import Halogen.HTML (HTML, a, blockquote_, br_, code_, em_, h1_, h2_, h3_, h4_, 
 import Halogen.HTML.Properties (alt, href, id_, src)
 import Halogen.HTML.Properties as HP
 import Prelude
-import Text.Markdown.SlamDown (Block(..), Inline(..), LinkTarget(..), ListType(..))
+import Text.Markdown.SlamDown.Syntax (Block(..), Inline(..), LinkTarget(..), ListType(..), SlamDown, SlamDownP(..))
 
 renderInline :: forall t102 t103 t130 t99. (Applicative t99) => Inline t130 -> t99 (HTML t103 t102)
 renderInline i =
@@ -87,23 +87,6 @@ renderBlock b =
     Rule →
       pure hr_
 
--- renderBlocks ∷ ∀ p. List (Block v) → Fresh (Array (HTML p (SlamDownQuery v)))
--- renderBlocks = go [] Nil
---       where
---       go html fs bs =
---         case bs of
---           L.Cons (SD.Paragraph (L.Cons (SD.FormField label required field) L.Nil)) bs' →
---             go html (L.Cons { label, required, field } fs) bs'
---           L.Cons b bs' → do
---             bHtml ← renderBlock b
---             if L.null fs
---               then go (html <> pure bHtml) L.Nil bs'
---               else do
---                 fsHtml ← renderFormSet (L.reverse fs)
---                 go (html <> pure fsHtml <> pure bHtml) L.Nil bs'
---           L.Nil →
---             if L.null fs
---               then pure html
---               else do
---                 fsHtml ← renderFormSet (L.reverse fs)
---                 pure (html <> pure fsHtml)
+render :: forall m p i. Monad m => SlamDown -> m (Array (HTML p i))
+render (SlamDown blocks) =
+  fromFoldable <$> traverse renderBlock blocks

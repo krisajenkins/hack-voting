@@ -1,15 +1,18 @@
 module Event.Types where
 
+import Data.Map as Map
 import Control.Monad.Eff.Exception (Error)
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
 import Data.Argonaut.Decode.Combinators ((.??))
+import Data.Foldable (foldl)
 import Data.Generic (class Generic, gShow)
 import Data.Map (Map)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), maybe)
+import Data.Monoid (mempty)
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Firebase (UID)
 import Network.RemoteData (RemoteData(..))
-import Prelude (class Eq, class Ord, class Show, bind, pure, ($), (<$>), (<>))
+import Prelude (class Eq, class Ord, class Show, bind, id, pure, ($), (+), (<$>), (<<<), (<>))
 import Test.QuickCheck (class Arbitrary, arbitrary)
 import Utils (getFieldNullable, keyMap)
 
@@ -184,3 +187,26 @@ bestTitle state =
 
         _ ->
             unwrap state.id
+
+------------------------------------------------------------
+
+tally :: Map UID Vote -> Map OptionId Int
+tally votes =
+  let
+      increment :: Maybe Int -> Maybe Int
+      increment =
+        Just <<< (+) 1 <<< maybe 0 id
+
+      tallyByPriority :: Vote -> Map OptionId Int -> Priority -> Map OptionId Int
+      tallyByPriority vote acc priority =
+        case voteN vote priority of
+          Nothing -> acc
+          Just optionId -> Map.alter increment optionId acc
+
+      tallyAllPriorities :: Map OptionId Int -> Vote -> Map OptionId Int
+      tallyAllPriorities acc vote =
+        foldl (tallyByPriority vote)
+            acc
+            priorities
+  in
+    foldl tallyAllPriorities mempty votes

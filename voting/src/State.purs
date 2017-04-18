@@ -57,7 +57,6 @@ eval (AuthResponse response next) = do
   pure next
 eval (Authenticate next) = pure next
 eval (EventMsg eventId (HeardEvent _ next)) = pure next
-eval (EventMsg eventId (Ignore next)) = pure next
 eval (EventMsg eventId (EventError _ next)) = pure next
 eval (EventMsg eventId (VoteFor priority option next)) = do
   liftEff $ log $ "Got a vote: " <> show priority <> " - " <> show option

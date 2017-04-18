@@ -29,7 +29,6 @@ instance showSomeUser :: Show SomeUser where
 data EventMsg a
     -- TODO HeardEvent and EventUpdated are logically the same thing.
     = HeardEvent (Either Error Event) a
-    | Ignore a
     | EventError Error a
     | VoteFor Priority (Maybe OptionId) a
     | OptionError Error a

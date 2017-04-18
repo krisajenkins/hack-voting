@@ -9,11 +9,11 @@ import Data.Maybe (Maybe(..))
 import Event as Event
 import Event.Types
 import Halogen (ComponentHTML)
-import Halogen.HTML (ClassName(ClassName), HTML, a, button, code_, div, div_, h1, h2, h2_, h3_, h4_, header_, i_, li_, text, ul)
+import Halogen.HTML (ClassName(ClassName), HTML, a, button, div, div_, h1, h2, h2_, h3_, h4_, header_, i_, li_, text, ul)
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (classes, disabled, href)
 import Network.RemoteData (RemoteData(..))
-import Prelude (class Show, show, ($), (<$>))
+import Prelude (show, ($), (<$>))
 import Routes (Router, View(..))
 import Types (Query(..), SomeUser, State)
 
@@ -65,13 +65,13 @@ canAuthenticate (Success _) = true
 canAuthenticate (Failure _) = false
 canAuthenticate NotAsked = false
 
-eventLinks :: forall query. Router View -> Map EventId EventState -> ComponentHTML query
+eventLinks :: forall p i. Router View -> Map EventId EventState -> HTML p i
 eventLinks router events =
   ul [ classes [ navTags ] ]
    (fromFoldable (eventLink router <$> Map.values events))
 
 
-eventLink :: forall query. Router View -> EventState -> ComponentHTML query
+eventLink :: forall p i. Router View -> EventState -> HTML p i
 eventLink router eventState =
   li_
     [ a [ href (router (EventView eventState.id)) ]
@@ -87,16 +87,7 @@ eventView :: SomeUser -> Maybe EventState -> ComponentHTML Query
 eventView user (Just event) = Event.render user event
 eventView _ Nothing = notFoundView
 
-
 ------------------------------------------------------------
-
-
-debuggingView :: forall a query. Show a => String -> a -> ComponentHTML query
-debuggingView title thing =
-  div [ classes [ alert.danger ] ]
-    [ h3_ [ text title ]
-    , div_ [ code_ [ text $ show thing ] ]
-    ]
 
 notFoundView :: forall p i. HTML p i
 notFoundView =
