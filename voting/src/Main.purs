@@ -44,9 +44,9 @@ redirects driverQuery (Tuple oldView newView) =
 firebaseConfig :: Firebase.Config
 firebaseConfig =
   { apiKey: "AIzaSyBG5-dI_sIjAC5KyQn5UEL9CLrhXwuiwgA"
-, authDomain: "voting-e6be5.firebaseapp.com"
-, databaseURL: "https://voting-e6be5.firebaseio.com"
-, storageBucket: ""
+  , authDomain: "voting-e6be5.firebaseapp.com"
+  , databaseURL: "https://voting-e6be5.firebaseio.com"
+  , storageBucket: ""
   }
 
 firebaseAuthProducer :: forall eff.
@@ -103,9 +103,9 @@ root :: forall aff.
   -> Component HTML Query Unit Message (Aff (firebase :: FIREBASE, dom :: DOM, console :: CONSOLE | aff))
 root app = component
   { initialState: const (State.init app)
- , render: View.render pathRouter
- , eval: State.eval
- , receiver: const Nothing
+  , render: View.render pathRouter
+  , eval: State.eval
+  , receiver: const Nothing
   }
 
 ------------------------------------------------------------
