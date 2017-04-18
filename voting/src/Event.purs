@@ -6,6 +6,7 @@ import Slamdown as Slamdown
 import Bootstrap (alert, btnGroup, classList, col, empty, listGroup, listGroupItem, pullRight, row, well)
 import CSS.Geometry (width)
 import CSS.Size (pct)
+import Control.Monad.Eff.Exception (Error)
 import Data.Array (fromFoldable, sortBy)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
@@ -17,7 +18,7 @@ import Data.Monoid (mempty)
 import Data.Newtype (unwrap)
 import Data.Traversable (maximum, traverse)
 import Data.Tuple (Tuple(Tuple), snd)
-import Firebase (FirebaseError, UID)
+import Firebase (UID)
 import Halogen (ClassName(..), ComponentHTML)
 import Halogen.HTML (HTML, button, div, div_, h2_, h3_, h4_, i_, p_, span, span_, sup_, text)
 import Halogen.HTML.CSS (style)
@@ -48,7 +49,7 @@ render user state =
         ]
 
 
-errorView :: forall query. String -> FirebaseError -> ComponentHTML query
+errorView :: forall query. String -> Error -> ComponentHTML query
 errorView title error =
     div [ class_ alert.danger ]
         [ h3_ [ text title ]

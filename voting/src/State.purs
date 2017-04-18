@@ -19,9 +19,9 @@ import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
 import Halogen (ComponentDSL, liftAff, raise)
-import Lenses (_auth, _uid, _votes, toEvent, toLens)
+import Lenses (_auth, _events, _uid, _voteError, _votes, toEvent, toLens)
 import Network.RemoteData (RemoteData(..), _success)
-import Prelude (type (~>), bind, pure, show, unit, ($), (<$>), (<<<), (<>), (>>>))
+import Prelude (type (~>), Unit, bind, const, pure, show, unit, ($), (<$>), (<<<), (<>), (>>>))
 
 init :: App -> State
 init app =
@@ -50,6 +50,7 @@ eval (EventMsg eventId (EventError _ next)) = pure next
 eval (EventMsg eventId (VoteFor priority option next)) = do
   liftEff $ log $ "Got a vote: " <> show priority <> " - " <> show option
   state <- get
+  -- TODO Refactor. This is a mess!
   case preview (_auth <<< _success <<< _uid) state of
     Nothing -> do
       liftEff $ log $ "No user, no vote."
@@ -58,15 +59,18 @@ eval (EventMsg eventId (VoteFor priority option next)) = do
       modifying
         (toEvent eventId <<< _votes <<< at uid)
         (setVote priority option)
+      modifying (_events <<< ix eventId <<< _voteError) (const Nothing)
       let path = toEvent eventId <<< _votes <<< ix uid
       newState <- get
       let vote :: Maybe Vote
           vote = preview path newState
       firebaseDb <- liftEff $ Firebase.getDb state.app
       let firebasePath = votePath eventId uid firebaseDb
-      liftAff $ Firebase.set firebasePath (encodeJson vote)
+      r :: Either Error Unit <- liftAff $ Firebase.set firebasePath (encodeJson vote)
+      case r of
+        Left err -> modifying (_events <<< ix eventId <<< _voteError) (const (Just err))
+        Right _ -> liftEff $ log $ "GOT Success"
       pure unit
-  -- TODO Send the vote to Firebase.
   pure next
 eval (EventMsg eventId (VoteError _ next)) = pure next
 eval (EventMsg eventId (OptionError _ next)) = pure next

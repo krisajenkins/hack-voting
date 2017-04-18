@@ -1,6 +1,7 @@
 module Lenses where
 
 import Types
+import Control.Monad.Eff.Exception (Error)
 import Data.Lens (Lens', Traversal', lens')
 import Data.Lens.Index (ix)
 import Data.Map (Map)
@@ -27,6 +28,9 @@ _uid = lens' (\(SomeUser someUser) -> Tuple someUser.uid (\uid -> SomeUser (some
 
 _votes :: Lens' Event (Map UID Vote)
 _votes = lens' (\(Event event) -> Tuple event.votes (\votes -> Event (event {votes = votes})))
+
+_voteError :: Lens' EventState (Maybe Error)
+_voteError = lens' (\eventState -> Tuple eventState.voteError (\voteError -> eventState {voteError = voteError}))
 
 _first :: Lens' Vote (Maybe OptionId)
 _first = lens' (\(Vote record) -> Tuple record.first (\first -> Vote (record {first = first})))

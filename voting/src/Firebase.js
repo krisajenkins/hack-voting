@@ -25,46 +25,34 @@ exports.getDb = function (appIgnored) {
     };
 };
 
-exports.getDbRef = function (name) {
-    return function (db) {
-        return db.ref(name);
+exports.getDbRef_ = function (name, db) {
+    return db.ref(name);
+};
+
+exports.getDbRefChild_ = function (name, dbRef) {
+    return dbRef.child(name);
+};
+
+exports.set_ = function (dbRef, value) {
+    return function () {
+        console.log("Sending to FireBase", dbRef.key, dbRef.toString(), value);
+        return dbRef.set(value);
     };
 };
 
-exports.getDbRefChild = function (name) {
-    return function (dbRef) {
-        return dbRef.child(name);
-    };
-};
+exports.on_ = function (dbRef, eventName, successCallback, errorsCallback) {
+    return function() {
+        dbRef.on(
+            eventName,
+            function (snapshot) {
+                return successCallback(snapshot)();
+            },
+            function (error) {
+                return errorsCallback(error)();
+            }
+        );
 
-exports.set_ = function (dbRef) {
-    return function (value) {
-        return function () {
-            console.log("Sending to FireBase", dbRef.key, dbRef.toString(), value);
-            return dbRef.set(value);
-        };
-    };
-};
-
-exports.on_ = function (dbRef) {
-    return function (eventName) {
-        return function (successCallback) {
-            return function (errorsCallback) {
-                return function() {
-                    dbRef.on(
-                        eventName,
-                        function (snapshot) {
-                            return successCallback(snapshot)();
-                        },
-                        function (error) {
-                            return errorsCallback(error)();
-                        }
-                    );
-
-                    return {};
-                };
-            };
-        };
+        return {};
     };
 };
 

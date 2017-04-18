@@ -14,12 +14,12 @@ import DOM (DOM)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
-import Firebase (App, FIREBASE, email, initializeApp, signInAnonymously, uid)
+import Firebase (App, FIREBASE, User, email, initializeApp, signInAnonymously, uid)
 import Halogen (Component, action, component, lift, liftEff)
 import Halogen.Aff (HalogenEffects, awaitBody, runHalogenAff)
 import Halogen.HTML (HTML)
 import Halogen.VDom.Driver (runUI)
-import Network.RemoteData (RemoteData(..))
+import Network.RemoteData (RemoteData(..), fromEither)
 import Routing (matchesAff)
 import Types (Message(..), Query(..), SomeUser(SomeUser), View, pathRouter, routing)
 
@@ -46,12 +46,15 @@ firebaseConfig =
 
 firebaseAuthProducer :: forall eff.
   App
-  -> Producer (RemoteData Error SomeUser)
+  -> Producer
+       (RemoteData Error SomeUser)
        (Aff (firebase :: FIREBASE, console :: CONSOLE, err :: EXCEPTION | eff)) Unit
 firebaseAuthProducer firebaseApp = do
   emit Loading
-  user <- lift $ signInAnonymously firebaseApp
-  emit $ Success $ SomeUser {uid: (uid user), email: (email user) }
+  result :: RemoteData Error User <- lift $ fromEither <$> signInAnonymously firebaseApp
+  emit $ toSomeUser <$> result
+  where
+    toSomeUser user = SomeUser {uid: uid user, email: email user}
 
 firebaseAuthConsumer
   :: forall eff
@@ -74,7 +77,8 @@ redirects :: forall eff.
   -> Maybe View
   -> View
   -> Aff eff Unit
-redirects driver _ view = do driver $ action $ UpdateView view
+redirects driver _ view = do
+  driver $ action $ UpdateView view
 
 ------------------------------------------------------------
 
@@ -82,7 +86,8 @@ firebaseMessageHandlerThing :: forall eff.
   App
   -> (Query ~> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)))
   -> Consumer Message (Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff))) Unit
-firebaseMessageHandlerThing firebaseApp driver = consumer $ foo firebaseApp driver
+firebaseMessageHandlerThing firebaseApp driver =
+  consumer $ foo firebaseApp driver
 
 foo :: forall eff a.
   App
@@ -91,8 +96,9 @@ foo :: forall eff a.
   -> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)) (Maybe a)
 foo firebaseApp driver (WatchEvent eventId) = do
   firebaseDb <- liftEff $ Firebase.getDb firebaseApp
-  let eventsRef = Firebase.getDbRef "events" firebaseDb
-  let eventRef = Firebase.getDbRefChild (unwrap eventId) eventsRef
+  let eventRef = firebaseDb
+          # Firebase.getDbRef "events"
+          # Firebase.getDbRefChild (unwrap eventId)
   forkAff $ runProcess $ connect
       (Firebase.onValue eventRef)
       (consumer \msg -> do

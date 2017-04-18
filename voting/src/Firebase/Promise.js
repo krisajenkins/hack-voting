@@ -2,22 +2,19 @@
 /*global firebase*/
 'use strict';
 
-exports.andCatch = function (promise) {
-    return function (callback) {
-        return function () {
-            promise.catch(function (err) {
-                callback(err.message)();
-            });
-        };
+exports.andCatch = function (promise, callback) {
+    return function () {
+        console.log("Registering catch callback.");
+        promise.catch(function (err) {
+            callback(err)();
+        });
     };
 };
 
-exports.andThen = function (promise) {
-    return function (callback) {
-        return function () {
-            promise.then(function (v) {
-                callback(v)();
-            });
-        };
+exports.andThen = function (promise, callback) {
+    return function () {
+        promise.then(function (v) {
+            callback(v)();
+        });
     };
 };

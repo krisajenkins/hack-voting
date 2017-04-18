@@ -16,7 +16,7 @@ import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.StrMap (StrMap, toUnfoldable)
 import Data.Tuple (Tuple)
-import Firebase (FirebaseError, Email, UID)
+import Firebase (Email, UID)
 import Network.RemoteData (RemoteData(..))
 import Prelude (class Eq, class Ord, class Show, bind, pure, ($), (*>), (<$), (<$>), (<>))
 import Routing.Match (Match)
@@ -198,19 +198,19 @@ voteN (Vote vote) priority =
 type EventState =
     { id :: EventId
     , event :: RemoteData String Event
-    , eventError :: Maybe FirebaseError
-    , voteError :: Maybe FirebaseError
-    , optionError :: Maybe FirebaseError
+    , eventError :: Maybe Error
+    , voteError :: Maybe Error
+    , optionError :: Maybe Error
     }
 
 data EventMsg a
     -- TODO HeardEvent and EventUpdated are logically the same thing.
-    = HeardEvent (Either String Event) a
+    = HeardEvent (Either Error Event) a
     | Ignore a
-    | EventError FirebaseError a
+    | EventError Error a
     | VoteFor Priority (Maybe OptionId) a
-    | VoteError FirebaseError a
-    | OptionError FirebaseError a
+    | VoteError Error a
+    | OptionError Error a
 
 bestTitle :: EventState -> String
 bestTitle state =
@@ -248,7 +248,7 @@ data Query a
     | Authenticate a
     | AuthResponse (RemoteData Error SomeUser) a
     | EventMsg EventId (EventMsg a)
-    | EventUpdated EventId (Either String Firebase.Snapshot) a
+    | EventUpdated EventId (Either Error Firebase.Snapshot) a
 
 data Message
   = WatchEvent EventId

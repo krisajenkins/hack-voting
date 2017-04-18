@@ -22,21 +22,22 @@ module Firebase
 
 import Control.Coroutine (Producer)
 import Control.Coroutine.Aff (produce)
-import Control.Monad.Aff (Aff, makeAff)
+import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Exception (EXCEPTION)
+import Control.Monad.Eff.Exception (EXCEPTION, Error)
 import Data.Argonaut (Json)
 import Data.Either (Either(..))
+import Data.Function.Uncurried (Fn2, Fn4, runFn2, runFn4)
 import Data.Generic (class Generic, gShow)
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
 import Data.Show (class Show)
 import FFI.Util (property)
-import Firebase.Core (FIREBASE, FirebaseError)
-import Firebase.Promise (Promise, promiseHandler)
-import Prelude (class Eq, class Ord, Unit, bind, ($), (<$>))
+import Firebase.Core (FIREBASE)
+import Firebase.Promise (Promise, runPromise)
+import Prelude (class Eq, class Ord, Unit, bind, ($), (<$>), (<<<))
 
 newtype UID = UID String
 
@@ -75,47 +76,56 @@ foreign import initializeApp :: forall eff. Config -> Eff (err :: EXCEPTION, fir
 foreign import getAuth :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Auth
 foreign import getDb :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Db
 
-foreign import getDbRef :: String -> Db -> DbRef
-foreign import getDbRefChild :: String -> DbRef -> DbRef
+foreign import getDbRef_ :: Fn2 String Db DbRef
+foreign import getDbRefChild_ :: Fn2 String DbRef DbRef
 
-foreign import on_ :: forall eff.
-  DbRef
-  -> String
-  -> (Snapshot -> Eff (firebase :: FIREBASE | eff) Unit)
-  -> (FirebaseError -> Eff (firebase :: FIREBASE | eff) Unit)
-  -> Eff (firebase :: FIREBASE | eff) Unit
+getDbRef :: String -> Db -> DbRef
+getDbRef = runFn2 getDbRef_
+
+getDbRefChild :: String -> DbRef -> DbRef
+getDbRefChild = runFn2 getDbRefChild_
+
+foreign import on_ ::
+  forall eff.
+  Fn4
+    DbRef
+    String
+    (Snapshot -> Eff (firebase :: FIREBASE | eff) Unit)
+    (Error -> Eff (firebase :: FIREBASE | eff) Unit)
+    (Eff (firebase :: FIREBASE | eff) Unit)
 
 -- TODO Snapshot should be Json - it's easier and still true.
 -- TODO Make set into set_ and handle the promise internally, exposing an Aff.
-foreign import set_ :: forall eff.
-  DbRef
-  -> Json
-  -> Eff (firebase :: FIREBASE | eff) (Promise Unit)
+foreign import set_ ::
+  forall eff. Fn2 DbRef Json (Eff (firebase :: FIREBASE | eff) (Promise Unit))
 
 set :: forall eff.
   DbRef
   -> Json
-  -> Aff (firebase :: FIREBASE | eff) Unit
+  -> Aff (firebase :: FIREBASE | eff) (Either Error Unit)
 set dbRef json = do
-  promise <- liftEff $ set_ dbRef json
-  makeAff $ promiseHandler promise
+  promise <- liftEff $ runFn2 set_ dbRef json
+  runPromise promise
 
 onValue :: forall eff.
   DbRef
-  -> Producer (Either String Snapshot)
+  -> Producer
+       (Either Error Snapshot)
        (Aff (avar :: AVAR, firebase :: FIREBASE | eff)) Unit
 onValue dbRef = produce \emit -> do
-  on_ dbRef "value"
-    (\snapshot -> emit $ Left $ Right snapshot)
-    (\error -> emit $ Left $ Left error)
+  runFn4 on_ dbRef "value"
+    (emit <<< Left <<< Right)
+    (emit <<< Left <<< Left)
 
 foreign import signInAnonymously_ :: forall eff. Auth -> Eff (firebase :: FIREBASE | eff) (Promise User)
 
-signInAnonymously :: forall aff. App -> Aff (firebase :: FIREBASE | aff) User
+signInAnonymously ::
+  forall aff.
+  App -> Aff (firebase :: FIREBASE | aff) (Either Error User)
 signInAnonymously app = do
   auth <- liftEff $ getAuth app
   promise <- liftEff $ signInAnonymously_ auth
-  makeAff $ promiseHandler promise
+  runPromise promise
 
 uid :: User -> UID
 uid user = UID $ property user "uid"
