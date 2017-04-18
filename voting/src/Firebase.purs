@@ -117,14 +117,18 @@ onValue dbRef = produce \emit -> do
     (emit <<< Left <<< Right)
     (emit <<< Left <<< Left)
 
-foreign import signInAnonymously_ :: forall eff. Auth -> Eff (firebase :: FIREBASE | eff) (Promise User)
+foreign import signInAnonymously_ ::
+  forall eff.
+  Auth
+  -> Eff (firebase :: FIREBASE | eff) (Promise User)
 
 signInAnonymously ::
   forall aff.
   App -> Aff (firebase :: FIREBASE | aff) (Either Error User)
 signInAnonymously app = do
-  auth <- liftEff $ getAuth app
-  promise <- liftEff $ signInAnonymously_ auth
+  promise <- liftEff $ do
+    auth <- getAuth app
+    signInAnonymously_ auth
   runPromise promise
 
 uid :: User -> UID
@@ -133,4 +137,7 @@ uid user = UID $ property user "uid"
 email :: User -> Maybe Email
 email user = Email <$> property user "email"
 
-foreign import getVal :: forall eff. Snapshot -> Eff (firebase :: FIREBASE | eff) Json
+foreign import getVal ::
+  forall eff.
+  Snapshot
+  -> Eff (firebase :: FIREBASE | eff) Json
