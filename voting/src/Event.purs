@@ -25,7 +25,7 @@ import Halogen.HTML.CSS (style)
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (class_, classes)
 import Network.RemoteData (RemoteData(..))
-import Prelude (class Monad, class Ord, comparing, id, map, not, show, (#), ($), (*), (+), (/), (<$>), (<<<), (==))
+import Prelude (class Monad, class Ord, comparing, id, map, negate, not, show, (#), ($), (*), (+), (/), (<$>), (<<<), (==), (>>>))
 import Text.Markdown.SlamDown.Parser (parseMd)
 import Types (Event(..), EventMsg(..), EventState, Option(..), OptionId, Priority(..), Query(..), SomeUser(..), Vote, initialVote, priorities, voteN)
 
@@ -201,7 +201,7 @@ votesView (Event event) =
             tally event.votes
                 # Map.toList
                 # fromFoldable
-                # sortWith snd
+                # sortWith (snd >>> negate)
     in
         div_
             [ h2_ [ text "Live Results" ]
