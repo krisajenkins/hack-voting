@@ -1,30 +1,31 @@
 module State where
 
+import Types
+import Data.Map as Map
+import Firebase as Firebase
+import Network.RemoteData as RemoteData
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Exception (Error)
 import Control.Monad.State (get, modify)
 import Data.Argonaut (decodeJson, encodeJson)
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Foldable (foldl)
-import Data.Lens (modifying, preview, set)
+import Data.Lens (assign, modifying, preview, set)
 import Data.Lens.At (at)
 import Data.Lens.Index (ix)
 import Data.Map (Map)
-import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
-import Event.Lenses (_voteError, _votes, toLens)
+import Event.Lenses (_event, _voteError, _votes, toLens)
 import Event.Types (EventId(..), EventState, OptionId, Priority, Vote, initialVote)
 import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
-import Firebase as Firebase
 import Halogen (ComponentDSL, liftAff, raise)
 import Lenses (_auth, _events, _uid, toEvent)
 import Network.RemoteData (RemoteData(..), _success)
-import Network.RemoteData as RemoteData
-import Prelude (type (~>), Unit, bind, const, pure, show, unit, ($), (<$>), (<<<), (<>), (>>>))
+import Prelude (type (~>), bind, pure, show, ($), (<<<), (<>), (>>=), (>>>))
 import Routes (View(..))
-import Types
 
 initEventState :: EventId -> EventState
 initEventState eventId =
@@ -56,8 +57,6 @@ eval (AuthResponse response next) = do
   raise $ WatchEvent $ EventId "languages"
   pure next
 eval (Authenticate next) = pure next
-eval (EventMsg eventId (HeardEvent _ next)) = pure next
-eval (EventMsg eventId (EventError _ next)) = pure next
 eval (EventMsg eventId (VoteFor priority option next)) = do
   liftEff $ log $ "Got a vote: " <> show priority <> " - " <> show option
   state <- get
@@ -65,42 +64,37 @@ eval (EventMsg eventId (VoteFor priority option next)) = do
   case preview (_auth <<< _success <<< _uid) state of
     Nothing -> do
       liftEff $ log $ "No user, no vote."
+
     Just uid -> do
       liftEff $ log $ "User: " <> show uid
       modifying
         (toEvent eventId <<< _votes <<< at uid)
         (setVote priority option)
-      modifying (_events <<< ix eventId <<< _voteError) (const Nothing)
-      let path = toEvent eventId <<< _votes <<< ix uid
+      let votePath = toEvent eventId <<< _votes <<< ix uid
+      let voteErrorPath = _events <<< ix eventId <<< _voteError
+
+      assign voteErrorPath Nothing
+
       newState <- get
       let vote :: Maybe Vote
-          vote = preview path newState
+          vote = preview votePath newState
+
       firebaseDb <- liftEff $ Firebase.getDb state.app
-      let firebasePath = votePath eventId uid firebaseDb
-      r :: Either Error Unit <- liftAff $ Firebase.set firebasePath (encodeJson vote)
-      case r of
-        Left err -> modifying (_events <<< ix eventId <<< _voteError) (const (Just err))
-        Right _ -> liftEff $ log $ "GOT Success"
-      pure unit
+      let firebaseRef = voteDbRef eventId uid firebaseDb
+      result <- liftAff $ Firebase.set firebaseRef (encodeJson vote)
+      assign voteErrorPath $ case result of
+        Left err -> Just err
+        Right _ -> Nothing
+
   pure next
-eval (EventMsg eventId (OptionError _ next)) = pure next
-eval (EventUpdated eventId (Left err) next) = do
-  liftEff $ log $ "Got an error: " <> show err
-  pure next
-eval (EventUpdated eventId (Right snapshot) next) = do
-  value <- liftEff $ do
-             value <- decodeJson <$> Firebase.getVal snapshot
-             log $ "Got a snapshot: " <> show value
-             pure value
-  modify (\state ->
-           state { events = Map.update (_ { event = RemoteData.fromEither value } >>> Just)
-                            eventId
-                            state.events })
+eval (EventUpdated eventId response next) = do
+  assign (_events <<< ix eventId <<< _event)
+    (lmap show response >>= (decodeJson >>> RemoteData.fromEither))
   pure next
 
 
-votePath :: EventId -> UID -> Db -> DbRef
-votePath (EventId eventId) (UID uid) =
+voteDbRef :: EventId -> UID -> Db -> DbRef
+voteDbRef (EventId eventId) (UID uid) =
   getDbRef "events"
   >>> getDbRefChild eventId
   >>> getDbRefChild "votes"

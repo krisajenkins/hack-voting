@@ -1,13 +1,13 @@
 module Types where
 
+import Firebase as Firebase
 import Control.Monad.Eff.Exception (Error)
-import Data.Either (Either)
+import Data.Argonaut (Json)
 import Data.Generic (class Generic, gShow)
 import Data.Map (Map)
 import Data.Maybe (Maybe)
-import Event.Types (Event, EventId, EventState, OptionId, Priority)
+import Event.Types (EventId, EventState, OptionId, Priority)
 import Firebase (Email, UID)
-import Firebase as Firebase
 import Network.RemoteData (RemoteData)
 import Prelude (class Show)
 import Routes (View)
@@ -27,18 +27,14 @@ instance showSomeUser :: Show SomeUser where
 ------------------------------------------------------------
 
 data EventMsg a
-    -- TODO HeardEvent and EventUpdated are logically the same thing.
-    = HeardEvent (Either Error Event) a
-    | EventError Error a
-    | VoteFor Priority (Maybe OptionId) a
-    | OptionError Error a
+    = VoteFor Priority (Maybe OptionId) a
 
 data Query a
     = UpdateView View a
     | Authenticate a
     | AuthResponse (RemoteData Error SomeUser) a
     | EventMsg EventId (EventMsg a)
-    | EventUpdated EventId (Either Error Firebase.Snapshot) a
+    | EventUpdated EventId (RemoteData Error Json) a
 
 data Message
   = WatchEvent EventId

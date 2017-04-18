@@ -1,9 +1,5 @@
 module Main where
 
-import Prelude
-import Firebase as Firebase
-import State as State
-import View as View
 import Control.Coroutine (Consumer, Producer, connect, consumer, emit, runProcess)
 import Control.Monad.Aff (Aff, forkAff)
 import Control.Monad.Aff.Console (logShow)
@@ -11,18 +7,24 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION, Error)
 import DOM (DOM)
+import Data.Argonaut (Json)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Firebase (App, FIREBASE, User, email, initializeApp, signInAnonymously, uid)
+import Firebase as Firebase
 import Halogen (Component, action, component, lift, liftEff)
 import Halogen.Aff (HalogenEffects, awaitBody, runHalogenAff)
 import Halogen.HTML (HTML)
 import Halogen.VDom.Driver (runUI)
 import Network.RemoteData (RemoteData(..), fromEither)
-import Routing (matchesAff)
-import Types (Message(..), Query(..), SomeUser(..))
+import Prelude
 import Routes (View, pathRouter, routing)
+import Routing (matchesAff)
+import State as State
+import Types (Message(..), Query(..), SomeUser(..))
+import View as View
 
 -- | TODO http://stackoverflow.com/questions/38370322/purescript-halogen-and-websockets
 root :: forall aff.
@@ -100,11 +102,17 @@ foo firebaseApp driver (WatchEvent eventId) = do
   let eventRef = firebaseDb
           # Firebase.getDbRef "events"
           # Firebase.getDbRefChild (unwrap eventId)
-  forkAff $ runProcess $ connect
-      (Firebase.onValue eventRef)
-      (consumer \msg -> do
-           driver $ action $ EventUpdated eventId msg
-           pure Nothing)
+  forkAff $ runProcess $ connect (Firebase.onValue eventRef) $
+      consumer \msg -> do
+        processed <-
+          case msg of
+            Right snapshot -> do
+              val :: Json <- liftEff $ Firebase.getVal snapshot
+              pure (Success val)
+            Left err -> do
+              pure (Failure err)
+        driver $ action $ EventUpdated eventId processed
+        pure Nothing
   logShow eventId
   pure Nothing
 
