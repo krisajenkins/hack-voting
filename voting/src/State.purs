@@ -89,7 +89,7 @@ eval (EventMsg eventId (VoteFor priority option) next) = do
   pure next
 eval (EventMsg eventId (EventUpdated response) next) = do
   assign (_events <<< ix eventId <<< _event)
-    (lmap show response >>= (decodeJson >>> RemoteData.fromEither))
+    (RemoteData.fromEither (lmap show response >>= decodeJson))
   pure next
 
 voteDbRef :: EventId -> UID -> Db -> DbRef

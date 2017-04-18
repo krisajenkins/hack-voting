@@ -4,6 +4,7 @@ import Data.Map as Map
 import Control.Monad.Eff.Exception (Error)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
 import Data.Argonaut.Decode.Combinators ((.??))
+import Data.Either (Either)
 import Data.Foldable (foldl)
 import Data.Generic (class Generic, gShow)
 import Data.Map (Map)
@@ -173,7 +174,7 @@ voteN (Vote vote) priority =
 
 data EventMsg
     = VoteFor Priority (Maybe OptionId)
-    | EventUpdated (RemoteData Error Json)
+    | EventUpdated (Either Error Json)
 
 type EventState =
     { id :: EventId

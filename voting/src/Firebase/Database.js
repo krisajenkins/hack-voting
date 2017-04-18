@@ -29,7 +29,7 @@ exports.on_ = function (dbRef, eventName, successCallback, errorsCallback) {
         dbRef.on(
             eventName,
             function (snapshot) {
-                return successCallback(snapshot)();
+                return successCallback(snapshot.val())();
             },
             function (error) {
                 return errorsCallback(error)();
@@ -37,11 +37,5 @@ exports.on_ = function (dbRef, eventName, successCallback, errorsCallback) {
         );
 
         return {};
-    };
-};
-
-exports.getVal = function (snapshot) {
-    return function () {
-        return snapshot.val();
     };
 };

@@ -3,6 +3,8 @@ module Utils where
 import Data.Map as Map
 import Data.StrMap as StrMap
 import Control.Category ((<<<))
+import Control.Coroutine (Consumer, consumer)
+import Control.Monad (class Monad)
 import Data.Argonaut (class DecodeJson, JObject, decodeJson)
 import Data.Array (sortBy)
 import Data.Bifunctor (lmap)
@@ -13,7 +15,7 @@ import Data.Newtype (class Newtype, wrap)
 import Data.Ord (comparing)
 import Data.StrMap (StrMap)
 import Data.Tuple (Tuple)
-import Prelude (class Ord, pure, (<$>))
+import Prelude (class Ord, pure, (<$>), bind)
 
 -- | Decodes:
 -- |
@@ -46,3 +48,13 @@ keyMap sm = asMap
 -- | TODO Builtin in Arrays v4.            -
 sortWith :: forall a b. (Ord b) => (a -> b) -> Array a -> Array a
 sortWith = sortBy <<< comparing
+
+
+taggedConsumer ::
+  forall r m i o.
+  (Monad m) =>
+  (i -> m o) -> Consumer i m r
+taggedConsumer tagger =
+  consumer \msg -> do
+    tagger msg
+    pure Nothing

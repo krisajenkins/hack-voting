@@ -4,10 +4,8 @@ module Firebase.Database
        , getDb
        , getDbRef
        , getDbRefChild
-       , getVal
        , onValue
        , set
-       , Snapshot
        )
        where
 
@@ -30,7 +28,6 @@ import Firebase.Promise (Promise, runPromise)
 foreign import data Db :: Type
 foreign import data DbRef :: Type
 foreign import data Ref :: Type
-foreign import data Snapshot :: Type
 foreign import getDb :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Db
 
 foreign import getDbRef_ :: Fn2 String Db DbRef
@@ -47,7 +44,7 @@ foreign import on_ ::
   Fn4
     DbRef
     String
-    (Snapshot -> Eff (firebase :: FIREBASE | eff) Unit)
+    (Json -> Eff (firebase :: FIREBASE | eff) Unit)
     (Error -> Eff (firebase :: FIREBASE | eff) Unit)
     (Eff (firebase :: FIREBASE | eff) Unit)
 
@@ -64,14 +61,9 @@ set dbRef json = do
 onValue :: forall eff.
   DbRef
   -> Producer
-       (Either Error Snapshot)
+       (Either Error Json)
        (Aff (avar :: AVAR, firebase :: FIREBASE | eff)) Unit
 onValue dbRef = produce \emit -> do
   runFn4 on_ dbRef "value"
     (emit <<< Left <<< Right)
     (emit <<< Left <<< Left)
-
-foreign import getVal ::
-  forall eff.
-  Snapshot
-  -> Eff (firebase :: FIREBASE | eff) Json
