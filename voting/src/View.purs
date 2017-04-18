@@ -21,7 +21,7 @@ render router state =
     [ header_
           [ container
               [ h1 [ classes [ ClassName "hostname" ] ]
-                [ text "TODO HOSTNAME" ] -- (Document.locationHost ()) ]
+                [ text "voting.clearercode.com" ] -- (Document.locationHost ()) ]
               , row
                   [ div [ classes [ col.xs12, col.sm9 ] ]
                       [ h3_ [ text "Vote-o-Matic" ] ]
