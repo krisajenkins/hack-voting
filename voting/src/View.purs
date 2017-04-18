@@ -7,15 +7,15 @@ import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Event as Event
+import Event.Types
 import Halogen (ComponentHTML)
 import Halogen.HTML (ClassName(ClassName), HTML, a, button, code_, div, div_, h1, h2, h2_, h3_, h4_, header_, i_, li_, text, ul)
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (classes, disabled, href)
 import Network.RemoteData (RemoteData(..))
 import Prelude (class Show, show, ($), (<$>))
-import Types (EventState, Query(..), SomeUser, State, bestTitle)
 import Routes (Router, View(..))
-import Event.Types (EventId)
+import Types (Query(..), SomeUser, State)
 
 render :: Router View -> State -> ComponentHTML Query
 render router state =

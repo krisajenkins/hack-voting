@@ -1,9 +1,5 @@
 module State where
 
-import Types
-import Data.Map as Map
-import Firebase as Firebase
-import Network.RemoteData as RemoteData
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
@@ -16,15 +12,19 @@ import Data.Lens (modifying, preview, set)
 import Data.Lens.At (at)
 import Data.Lens.Index (ix)
 import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
+import Event.Lenses (_voteError, _votes, toLens)
+import Event.Types (EventId(..), EventState, OptionId, Priority, Vote, initialVote)
 import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
+import Firebase as Firebase
 import Halogen (ComponentDSL, liftAff, raise)
-import Lenses (_auth, _events, _uid, _voteError, toEvent, toLens)
-import Event.Lenses (_votes)
-import Event.Types (EventId(..), OptionId, Priority, Vote, initialVote)
-import Routes (View(..))
+import Lenses (_auth, _events, _uid, toEvent)
 import Network.RemoteData (RemoteData(..), _success)
+import Network.RemoteData as RemoteData
 import Prelude (type (~>), Unit, bind, const, pure, show, unit, ($), (<$>), (<<<), (<>), (>>>))
+import Routes (View(..))
+import Types
 
 initEventState :: EventId -> EventState
 initEventState eventId =
