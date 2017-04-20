@@ -49,7 +49,6 @@ keyMap sm = asMap
 sortWith :: forall a b. (Ord b) => (a -> b) -> Array a -> Array a
 sortWith = sortBy <<< comparing
 
-
 taggedConsumer ::
   forall r m i o.
   (Monad m) =>

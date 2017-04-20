@@ -66,9 +66,8 @@ firebaseAuthConsumer
    . (Query ~> Aff (HalogenEffects (firebase :: FIREBASE | eff)))
   -> Consumer (RemoteData Error SomeUser)
        (Aff (HalogenEffects (firebase :: FIREBASE | eff))) Unit
-firebaseAuthConsumer driver = consumer \someUser -> do
-  driver $ action $ AuthResponse someUser
-  pure Nothing
+firebaseAuthConsumer driver =
+  taggedConsumer (driver <<< action <<< AuthResponse)
 
 ------------------------------------------------------------
 
@@ -78,7 +77,8 @@ watch :: forall a eff.
   -> Message
   -> Aff (avar :: AVAR, firebase :: FIREBASE, console :: CONSOLE | eff) (Maybe a)
 watch firebaseDb driverQuery (WatchEvent eventId) = do
-  forkAff $ refToMessageStream ref tagger
+  forkAff $ runProcess $
+    connect (Firebase.onValue ref) (taggedConsumer tagger)
   pure Nothing
   where
     ref =
@@ -86,15 +86,6 @@ watch firebaseDb driverQuery (WatchEvent eventId) = do
       # Firebase.getDbRef "events"
       # Firebase.getDbRefChild (unwrap eventId)
     tagger = EventUpdated >>> EventMsg eventId >>> action >>> driverQuery
-
-refToMessageStream :: forall eff a.
-  Firebase.DbRef
-  -> (Either Error Json -> Aff (avar :: AVAR, firebase :: FIREBASE | eff) a)
-  -> Aff (avar :: AVAR, firebase :: FIREBASE | eff) Unit
-refToMessageStream ref tagger = do
-  runProcess $ connect
-    (Firebase.onValue ref)
-    (taggedConsumer tagger)
 
 ------------------------------------------------------------
 

@@ -3,7 +3,6 @@ module Event.View
        where
 
 import Bootstrap
-import Event.Types (Event(..), EventMsg(..), EventState, Option(..), OptionId, Priority(..), Vote, initialVote, priorities, tally, voteN)
 import Data.Map as Map
 import Halogen.HTML.CSS as CSS
 import Slamdown as Slamdown
@@ -14,16 +13,21 @@ import Data.Either (Either(..))
 import Data.Foldable (maximum)
 import Data.Identity (Identity)
 import Data.Int (toNumber)
+import Data.Lens (view)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), snd)
+import Event.Lenses (toLens)
+import Event.State (initialVote)
+import Event.Types (Event(..), EventMsg(..), EventState, Option(..), OptionId, Priority(..), Vote, priorities, tally, voteN)
 import Halogen.HTML (ClassName(..), HTML, button, div, div_, h2_, h3_, h4_, i_, p_, span_, sup_, text)
 import Halogen.HTML.Events (onClick)
 import Halogen.HTML.Properties (class_, classes)
 import Network.RemoteData (RemoteData(..))
 import Prelude (const, id, map, negate, not, (#), ($), (*), (/), (<$>), (==), (>>>))
 import Text.Markdown.SlamDown.Parser (parseMd)
+import Text.Markdown.SlamDown (SlamDown)
 import Types (SomeUser(..))
 import Utils (sortWith)
 
@@ -32,22 +36,14 @@ root user state =
   div_ [ maybe empty (errorView "There was a problem loading this event.") state.eventError
        , maybe empty (errorView "There was a problem saving your vote.") state.voteError
        , maybe empty (errorView "There was a problem saving your option.") state.optionError
-       , case state.event of
-           Success event ->
-             eventView user event
+       , eventView user state.event
+       ]
 
-           Failure err ->
-             div [ class_ alert.danger ] [ text err ]
-
-           Loading ->
-             h2_ [ i_ [ text "Waiting for event data..." ] ]
-
-           NotAsked ->
-             h2_ [ text "Initialising." ]
-        ]
-
-eventView :: forall p. SomeUser -> Event -> HTML p EventMsg
-eventView (SomeUser user) event =
+eventView :: forall p. SomeUser -> RemoteData String Event -> HTML p EventMsg
+eventView _ (Failure err) = div [ class_ alert.danger ] [ text err ]
+eventView _ Loading = h2_ [ i_ [ text "Waiting for event data..." ] ]
+eventView _ NotAsked = h2_ [ text "Initialising." ]
+eventView (SomeUser user) (Success event) =
   let
     userVote =
       Map.lookup user.uid (unwrap event).votes
@@ -85,11 +81,15 @@ optionView userVote (Tuple optionId (Option option)) =
       [ div [ class_ pullRight ]
           [ voteButtons userVote optionId ]
       , h3_ [ text option.name ]
-      , case parseMd <$> option.description of
-          Nothing -> empty
-          Just (Left err) -> i_ [ text err ]
-          Just (Right markdown) -> div_ $ unwrap (Slamdown.render markdown :: forall q i. Identity (Array (HTML q i)))
+      , descriptionView (parseMd <$> option.description)
       ]
+
+descriptionView ::
+  forall p i. Maybe (Either String SlamDown) -> HTML p i
+descriptionView Nothing = empty
+descriptionView (Just (Left err)) = i_ [ text err ]
+descriptionView (Just (Right markdown)) =
+  div_ $ unwrap (Slamdown.render markdown :: forall p' i'. Identity (Array (HTML p' i')))
 
 voteButtons :: forall p. Vote -> OptionId -> HTML p EventMsg
 voteButtons userVote optionId =
@@ -97,7 +97,7 @@ voteButtons userVote optionId =
     ordButton priority =
         let
           active =
-            case voteN userVote priority of
+            case view (toLens priority) userVote of
               Nothing -> false
               Just votedOptionId -> votedOptionId == optionId
         in
@@ -120,6 +120,7 @@ voteButtons userVote optionId =
   in
     div [ class_ btnGroup ]
       (ordButton <$> priorities)
+
 votesView :: forall p i. Event -> HTML p i
 votesView (Event event) =
     let

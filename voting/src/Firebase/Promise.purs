@@ -19,7 +19,6 @@ runPromise ::
   Promise a -> Aff (firebase :: FIREBASE | eff) (Either Error a)
 runPromise = attempt <<< makeAff <<< promiseHandler
 
--- TODO We're throwing away the error here. :-(
 promiseHandler :: forall eff a.
   Promise a
   -> (Error -> Eff (firebase :: FIREBASE | eff) Unit)

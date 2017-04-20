@@ -4,13 +4,17 @@ import Data.Map as Map
 import Control.Monad.Eff.Exception (Error)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
 import Data.Argonaut.Decode.Combinators ((.??))
+import Data.Array ((..))
+import Data.Bounded (class Bounded, bottom, top)
 import Data.Either (Either)
 import Data.Foldable (foldl)
 import Data.Generic (class Generic, gShow)
+import Data.Lens (unfolded, view)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (mempty)
 import Data.Newtype (class Newtype, unwrap, wrap)
+import Event.Lenses (toLens)
 import Firebase (UID)
 import Network.RemoteData (RemoteData(..))
 import Prelude (class Eq, class Ord, class Show, bind, id, pure, ($), (+), (<$>), (<<<), (<>))
@@ -93,13 +97,6 @@ instance arbitraryVote :: Arbitrary Vote where
     third <- arbitrary
     pure $ Vote {first, second, third}
 
-initialVote :: Vote
-initialVote = Vote
-    { first: Nothing
-    , second: Nothing
-    , third: Nothing
-    }
-
 ------------------------------------------------------------
 
 newtype EventId = EventId String
@@ -145,30 +142,13 @@ data Priority
     | Third
 
 derive instance genericPriority :: Generic Priority
+derive instance boundedPriority :: Bounded Priority
 
 instance showPriority :: Show Priority where
   show = gShow
 
-
 priorities :: Array Priority
-priorities =
-    [ First
-    , Second
-    , Third
-    ]
-
-
-voteN :: Vote -> Priority -> Maybe OptionId
-voteN (Vote vote) priority =
-    case priority of
-        First ->
-            vote.first
-
-        Second ->
-            vote.second
-
-        Third ->
-            vote.third
+priorities = [bottom .. top]
 
 ------------------------------------------------------------
 
@@ -196,7 +176,7 @@ bestTitle state =
 ------------------------------------------------------------
 
 tally :: Map UID Vote -> Map OptionId Int
-tally votes =
+tally =
   let
       increment :: Maybe Int -> Maybe Int
       increment =
@@ -204,7 +184,7 @@ tally votes =
 
       tallyByPriority :: Vote -> Map OptionId Int -> Priority -> Map OptionId Int
       tallyByPriority vote acc priority =
-        case voteN vote priority of
+        case view (toLens priority) vote of
           Nothing -> acc
           Just optionId -> Map.alter increment optionId acc
 
@@ -214,4 +194,4 @@ tally votes =
             acc
             priorities
   in
-    foldl tallyAllPriorities mempty votes
+    foldl tallyAllPriorities mempty

@@ -19,22 +19,14 @@ import Data.Lens.Index (ix)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Event.Lenses (_event, _voteError, _votes, toLens)
-import Event.Types (EventId(..), EventMsg(..), EventState, OptionId, Priority, Vote, initialVote)
+import Event.State (initEventState, initialVote)
+import Event.Types (EventId(..), EventMsg(..), EventState, OptionId, Priority, Vote)
 import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
-import Halogen (ComponentDSL, liftAff, raise)
+import Halogen (ComponentDSL, HalogenM(..), liftAff, raise)
 import Lenses (_auth, _events, _uid, toEvent)
 import Network.RemoteData (RemoteData(..), _success)
 import Prelude (type (~>), bind, pure, show, ($), (<<<), (<>), (>>=), (>>>))
 import Routes (View(..))
-
-initEventState :: EventId -> EventState
-initEventState eventId =
-  { id: eventId
-  , event: Loading
-  , eventError: Nothing
-  , voteError: Nothing
-  , optionError: Nothing
-  }
 
 init :: App -> State
 init app =
@@ -49,10 +41,8 @@ eval (UpdateView view next) = do
   modify (_ { view = view })
   pure next
 eval (AuthResponse response next) = do
-  modify $ \state -> state
-             { auth = response
-             , events = authEvents response state.events
-             }
+  assign _auth response
+  modifying _events (authEvents response)
   raise $ WatchEvent $ EventId "projects"
   raise $ WatchEvent $ EventId "languages"
   pure next
@@ -67,8 +57,7 @@ eval (EventMsg eventId (VoteFor priority option) next) = do
 
     Just uid -> do
       liftEff $ log $ "User: " <> show uid
-      modifying
-        (toEvent eventId <<< _votes <<< at uid)
+      modifying (toEvent eventId <<< _votes <<< at uid)
         (setVote priority option)
       let votePath = toEvent eventId <<< _votes <<< ix uid
       let voteErrorPath = _events <<< ix eventId <<< _voteError
@@ -85,8 +74,8 @@ eval (EventMsg eventId (VoteFor priority option) next) = do
       assign voteErrorPath $ case result of
         Left err -> Just err
         Right _ -> Nothing
-
   pure next
+
 eval (EventMsg eventId (EventUpdated response) next) = do
   assign (_events <<< ix eventId <<< _event)
     (RemoteData.fromEither (lmap show response >>= decodeJson))

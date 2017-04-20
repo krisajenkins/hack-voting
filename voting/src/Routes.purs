@@ -20,11 +20,11 @@ instance viewShow :: Show View where
 
 routing :: Match View
 routing =
-    (FrontPage <$ lit "")
+    FrontPage <$ lit ""
     <|>
-    (EventView <$> (lit "event" *> (EventId <$> str)))
+    EventView <$> (lit "event" *> (EventId <$> str))
     <|>
-    (NotFound <$> str)
+    NotFound <$> str
 
 type Router view = view -> String
 

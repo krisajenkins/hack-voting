@@ -1,0 +1,21 @@
+module Event.State where
+
+import Event.Types
+import Data.Maybe (Maybe(..))
+import Network.RemoteData (RemoteData(Loading))
+
+initEventState :: EventId -> EventState
+initEventState eventId =
+  { id: eventId
+  , event: Loading
+  , eventError: Nothing
+  , voteError: Nothing
+  , optionError: Nothing
+  }
+
+initialVote :: Vote
+initialVote = Vote
+    { first: Nothing
+    , second: Nothing
+    , third: Nothing
+    }
