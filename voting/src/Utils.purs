@@ -5,17 +5,20 @@ import Data.StrMap as StrMap
 import Control.Category ((<<<))
 import Control.Coroutine (Consumer, consumer)
 import Control.Monad (class Monad)
+import Control.Monad.State (class MonadState)
 import Data.Argonaut (class DecodeJson, JObject, decodeJson)
 import Data.Array (sortBy)
 import Data.Bifunctor (lmap)
 import Data.Either (Either)
+import Data.Lens (Lens, assign, use)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (class Newtype, wrap)
 import Data.Ord (comparing)
 import Data.StrMap (StrMap)
 import Data.Tuple (Tuple)
-import Prelude (class Ord, pure, (<$>), bind)
+import Data.Unit (Unit)
+import Prelude (class Ord, bind, pure, (<$>))
 
 -- | Decodes:
 -- |
@@ -57,3 +60,15 @@ taggedConsumer tagger =
   consumer \msg -> do
     tagger msg
     pure Nothing
+
+assignM :: forall s a b m. MonadState s m => Lens s s a b -> m b -> m Unit
+assignM l mv = do
+  old <- use l
+  new <- mv
+  assign l new
+
+modifyingM :: forall s a b m. MonadState s m => Lens s s a b -> (a -> m b) -> m Unit
+modifyingM l mf = do
+  old <- use l
+  new <- mf old
+  assign l new
