@@ -8,30 +8,28 @@ import Halogen.HTML.CSS as CSS
 import Slamdown as Slamdown
 import CSS (pct, width)
 import Common.View (errorView)
-import Data.Array (fromFoldable)
+import Firebase as Firebase
 import Data.Either (Either(..))
-import Data.Foldable (maximum)
+import Data.Foldable (all, maximum)
 import Data.Identity (Identity)
 import Data.Int (toNumber)
-import Data.Lens (view)
+import Data.Lens (view, viewOn)
 import Data.Map (Map)
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), snd)
-import Event.Lenses (toLens)
 import Event.State (initialVote)
-import Event.Types (Event(..), EventMsg(..), EventState, Option(..), OptionId, Priority(..), Vote, priorities, tally, voteN)
+import Event.Types (Event(..), EventMsg(..), EventState, Option(..), OptionId, Priority(..), Vote, priorities, tally, toLens)
 import Halogen.HTML (ClassName(..), HTML, button, div, div_, h2_, h3_, h4_, i_, p_, span_, sup_, text)
 import Halogen.HTML.Events (onClick)
 import Halogen.HTML.Properties (class_, classes)
 import Network.RemoteData (RemoteData(..))
-import Prelude (const, id, map, negate, not, (#), ($), (*), (/), (<$>), (==), (>>>))
-import Text.Markdown.SlamDown.Parser (parseMd)
+import Prelude (const, id, negate, not, (#), ($), (*), (/), (<$>), (<<<), (==), (>>>))
 import Text.Markdown.SlamDown (SlamDown)
-import Types (SomeUser(..))
+import Text.Markdown.SlamDown.Parser (parseMd)
 import Utils (sortWith)
 
-root :: forall p. SomeUser -> EventState -> HTML p EventMsg
+root :: forall p. Firebase.User -> EventState -> HTML p EventMsg
 root user state =
   div_ [ maybe empty (errorView "There was a problem loading this event.") state.eventError
        , maybe empty (errorView "There was a problem saving your vote.") state.voteError
@@ -39,11 +37,11 @@ root user state =
        , eventView user state.event
        ]
 
-eventView :: forall p. SomeUser -> RemoteData String Event -> HTML p EventMsg
+eventView :: forall p. Firebase.User -> RemoteData String Event -> HTML p EventMsg
 eventView _ (Failure err) = div [ class_ alert.danger ] [ text err ]
 eventView _ Loading = h2_ [ i_ [ text "Waiting for event data..." ] ]
 eventView _ NotAsked = h2_ [ text "Initialising." ]
-eventView (SomeUser user) (Success event) =
+eventView user (Success event) =
   let
     userVote =
       Map.lookup user.uid (unwrap event).votes
@@ -68,11 +66,7 @@ optionsView userVote (Event event) =
   div_
       [ h2_ [ text event.title ]
       , div [ class_ listGroup ]
-          (event.options
-              # Map.toList
-              # fromFoldable
-              # map (optionView userVote)
-          )
+          (optionView userVote <$> Map.toUnfoldable event.options)
       ]
 
 optionView :: forall p. Vote -> Tuple OptionId Option -> HTML p EventMsg
@@ -133,10 +127,10 @@ votesView (Event event) =
                 # maximum
                 # maybe 0 id
 
+        tallied :: Array (Tuple OptionId Int)
         tallied =
             tally event.votes
-                # Map.toList
-                # fromFoldable
+                # Map.toUnfoldable
                 # sortWith (snd >>> negate)
     in
         div_
@@ -178,24 +172,28 @@ voteBar options maxCount (Tuple optionId voteCount) =
             ]
 
 priorityString :: forall p i. Priority -> HTML p i
-priorityString = format
+priorityString = format <<< ordinal
   where
-    format First = builder "1" "st"
-    format Second = builder "2" "nd"
-    format Third = builder "3" "rd"
-    builder n suffix =
+    ordinal First = Tuple "1" "st"
+    ordinal Second = Tuple "2" "nd"
+    ordinal Third = Tuple "3" "rd"
+    format (Tuple n suffix) =
       span_ [ text n, sup_ [ text suffix ] ]
 
 votingFeedback :: forall p i. Vote -> HTML p i
 votingFeedback userVote =
   div [ class_ (ClassName "voting-feedback") ]
-    [ feedbackText  (voteN userVote <$> priorities) ]
+    [ if all isJust options
+      then div [ class_ alert.info ]
+               [ h4_ [ text "Thanks for voting!" ]
+               , p_ [ text "You can change your votes at any time." ]
+               ]
+      else div [ class_ alert.warning ]
+               [ h4_ [ text "Please use your remaining votes." ] ]
+    ]
   where
-    feedbackText [Just _, Just _, Just _] =
-      div [ class_ alert.info ]
-          [ h4_ [ text "Thanks for voting!" ]
-          , p_ [ text "You can change your votes at any time." ]
-          ]
-    feedbackText _ =
-      div [ class_ alert.warning ]
-          [ h4_ [ text "Please use your remaining votes." ] ]
+    options :: Array (Maybe OptionId)
+    options = getOption <$> priorities
+
+    getOption :: Priority -> Maybe OptionId
+    getOption priority = viewOn userVote $ toLens priority

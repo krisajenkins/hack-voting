@@ -4,7 +4,7 @@ module Firebase.Promise
        )
        where
 
-import Control.Bind (bind, pure)
+import Control.Bind (pure, discard)
 import Control.Category ((<<<))
 import Control.Monad.Aff (Aff, attempt, makeAff)
 import Control.Monad.Eff (Eff)

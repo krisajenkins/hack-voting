@@ -1,6 +1,6 @@
 module State where
 
-import Types
+import Types (Message(..), Query(..), State)
 import Data.Map as Map
 import Firebase as Firebase
 import Network.RemoteData as RemoteData
@@ -18,14 +18,13 @@ import Data.Lens.At (at)
 import Data.Lens.Index (ix)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Event.Lenses (_event, _voteError, _votes, toLens)
 import Event.State (initEventState, initialVote)
-import Event.Types (EventId(..), EventMsg(..), EventState, OptionId, Priority, Vote)
+import Event.Types (EventId(..), EventMsg(..), EventState, OptionId, Priority, Vote, _event, _voteError, _votes, toLens)
 import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
 import Halogen (ComponentDSL, liftAff, raise)
-import Lenses (_auth, _events, _uid, toEvent)
-import Network.RemoteData (RemoteData(..), _success)
-import Prelude (type (~>), bind, pure, show, ($), (<<<), (<>), (>>=), (>>>))
+import Lenses (_auth, _events, toEvent)
+import Network.RemoteData (RemoteData(..), _Success)
+import Prelude (type (~>), discard, bind, pure, show, ($), (<<<), (<>), (>>=), (>>>))
 import Routes (View(..))
 
 init :: App -> State
@@ -51,7 +50,7 @@ eval (EventMsg eventId (VoteFor priority option) next) = do
   liftEff $ log $ "Got a vote: " <> show priority <> " - " <> show option
   state <- get
   -- TODO Refactor. This is a mess!
-  case preview (_auth <<< _success <<< _uid) state of
+  case preview (_auth <<< _Success <<< Firebase._uid) state of
     Nothing -> do
       liftEff $ log $ "No user, no vote."
 
@@ -93,7 +92,7 @@ setVote priority option =
   Just <<< set (toLens priority) option <<< fromMaybe initialVote
 
 authEvents ::
-  RemoteData Error SomeUser
+  RemoteData Error Firebase.User
   -> Map EventId EventState
   -> Map EventId EventState
 authEvents (Success user) events = do

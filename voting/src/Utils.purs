@@ -54,11 +54,11 @@ sortWith = sortBy <<< comparing
 
 taggedConsumer ::
   forall r m i o.
-  (Monad m) =>
+  Monad m =>
   (i -> m o) -> Consumer i m r
 taggedConsumer tagger =
   consumer \msg -> do
-    tagger msg
+    _ <- tagger msg
     pure Nothing
 
 assignM :: forall s a b m. MonadState s m => Lens s s a b -> m b -> m Unit

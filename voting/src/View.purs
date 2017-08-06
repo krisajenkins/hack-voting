@@ -15,7 +15,8 @@ import Halogen.HTML.Properties (classes, disabled, href)
 import Network.RemoteData (RemoteData(..))
 import Prelude (show, ($), (<$>), (<<<))
 import Routes (Router, View(..))
-import Types (Query(..), SomeUser, State)
+import Types (Query(..), State)
+import Firebase as Firebase
 
 render :: Router View -> State -> ComponentHTML Query
 render router state =
@@ -59,7 +60,7 @@ render router state =
     ]
 
 
-canAuthenticate :: RemoteData Error SomeUser -> Boolean
+canAuthenticate :: RemoteData Error Firebase.User -> Boolean
 canAuthenticate Loading = true
 canAuthenticate (Success _) = true
 canAuthenticate (Failure _) = false
@@ -78,12 +79,12 @@ eventLink router eventState =
         [ h4_ [ text $ bestTitle eventState ] ]
     ]
 
-mainView :: SomeUser -> Map EventId EventState -> View -> ComponentHTML Query
+mainView :: Firebase.User -> Map EventId EventState -> View -> ComponentHTML Query
 mainView _ _ FrontPage = h3_ [ text "Choose one of the tabs above to start voting." ]
 mainView user events (EventView eventId) = eventView user $ Map.lookup eventId events
 mainView _ _ (NotFound _) = notFoundView
 
-eventView :: SomeUser -> Maybe EventState -> ComponentHTML Query
+eventView :: Firebase.User -> Maybe EventState -> ComponentHTML Query
 eventView user (Just event) = (action <<< EventMsg event.id) <$> Event.root user event
 eventView _ Nothing = notFoundView
 

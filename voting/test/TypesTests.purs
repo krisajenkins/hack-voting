@@ -46,9 +46,14 @@ jsonHandling = do
         (decodeJson jsonEmptyObject)
 
 serialise ::
-  forall a. (DecodeJson a, EncodeJson a, Eq a, Show a) =>
-  Proxy a ->
-  a -> Result
+  forall a.
+  DecodeJson a
+  => EncodeJson a
+  => Eq a
+  => Show a
+  => Proxy a
+  -> a
+  -> Result
 serialise _ a =
   case decodeJson $ encodeJson a of
     Left err -> false <?> err

@@ -6,7 +6,7 @@ module Firebase.Core
        )
        where
 
-import Control.Monad.Eff (Eff)
+import Control.Monad.Eff (Eff, kind Effect)
 import Control.Monad.Eff.Exception (EXCEPTION)
 
 foreign import data FIREBASE :: Effect
@@ -22,4 +22,4 @@ foreign import data App :: Type
 
 foreign import initializeApp ::
   forall eff.
-  Config -> Eff (err :: EXCEPTION, firebase :: FIREBASE | eff) App
+  Config -> Eff (exception :: EXCEPTION, firebase :: FIREBASE | eff) App

@@ -68,8 +68,8 @@ eventView user event =
 votingFeedback : Vote -> Html msg
 votingFeedback userVote =
     div [ class "voting-feedback" ]
-        [ uncurry div
-            <| case (List.map (voteN userVote) priorities) of
+        [ uncurry div <|
+            case (List.map (voteN userVote) priorities) of
                 (Just _) :: (Just _) :: (Just _) :: [] ->
                     ( [ class "alert alert-info" ]
                     , [ h4 [] [ text "Thanks for voting!" ]
@@ -162,18 +162,20 @@ tally =
     let
         increment =
             Just << (+) 1 << Maybe.withDefault 0
+
+        tallyByPriority : Vote -> Priority -> Dict String number -> Dict String number
+        tallyByPriority vote accessor =
+            voteN vote accessor
+                |> Maybe.map (flip Dict.update increment)
+                |> Maybe.withDefault identity
+
+        tallyAllPriorities : a -> Vote -> Dict String number -> Dict String number
+        tallyAllPriorities _ vote acc =
+            List.foldl (tallyByPriority vote)
+                acc
+                priorities
     in
-        Dict.foldl
-            (\_ vote acc ->
-                List.foldl
-                    (\accessor ->
-                        voteN vote accessor
-                            |> Maybe.map (flip Dict.update increment)
-                            |> Maybe.withDefault identity
-                    )
-                    acc
-                    priorities
-            )
+        Dict.foldl tallyAllPriorities
             Dict.empty
 
 
@@ -200,6 +202,7 @@ votesView event =
               else
                 well
                     (tallied
+                        |> List.sortBy (Tuple.second >> (*) -1)
                         |> List.map (voteBar event.options maxCount)
                         |> List.intersperse (hr [] [])
                     )
