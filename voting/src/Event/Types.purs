@@ -218,20 +218,7 @@ _votes = lens' (\(Event event) -> Tuple event.votes (\votes -> Event (event {vot
 _voteError :: Lens' EventState (Maybe Error)
 _voteError = lens' (\eventState -> Tuple eventState.voteError (\voteError -> eventState {voteError = voteError}))
 
---toLens :: forall t359. Strong t359 => Priority -> t359 (Maybe OptionId) (Maybe OptionId) -> t359 Vote Vote
 toLens :: forall f. Strong f => Priority -> Optic' f Vote (Maybe OptionId)
 toLens First = _first
 toLens Second = _second
 toLens Third = _third
-
--- voteN : Vote -> Priority -> Maybe OptionId
--- voteN vote priority =
---     case priority of
---         First ->
---             vote.first
-
---         Second ->
---             vote.second
-
---         Third ->
---             vote.third

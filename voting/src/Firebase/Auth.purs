@@ -72,9 +72,3 @@ derive instance genericEmail :: Generic Email
 
 instance showEmail :: Show Email where
   show = gShow
-
--- uid :: User -> UID
--- uid user = UID $ view (string <<< prop "uid") user
-
--- email :: User -> Maybe Email
--- email user = Email <$> view (string <<< prop "email") user
