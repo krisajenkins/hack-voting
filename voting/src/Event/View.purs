@@ -3,28 +3,29 @@ module Event.View
        where
 
 import Bootstrap
-import Data.Map as Map
-import Halogen.HTML.CSS as CSS
-import Slamdown as Slamdown
+
 import CSS (pct, width)
 import Common.View (errorView)
-import Firebase as Firebase
 import Data.Either (Either(..))
 import Data.Foldable (all, maximum)
 import Data.Identity (Identity)
 import Data.Int (toNumber)
 import Data.Lens (view, viewOn)
 import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), snd)
 import Event.State (initialVote)
 import Event.Types (Event(..), EventMsg(..), EventState, Option(..), OptionId, Priority(..), Vote, priorities, tally, toLens)
+import Firebase as Firebase
 import Halogen.HTML (ClassName(..), HTML, button, div, div_, h2_, h3_, h4_, i_, p_, span_, sup_, text)
+import Halogen.HTML.CSS as CSS
 import Halogen.HTML.Events (onClick)
 import Halogen.HTML.Properties (class_, classes)
 import Network.RemoteData (RemoteData(..))
 import Prelude (const, id, negate, not, (#), ($), (*), (/), (<$>), (<<<), (==), (>>>))
+import Slamdown as Slamdown
 import Text.Markdown.SlamDown (SlamDown)
 import Text.Markdown.SlamDown.Parser (parseMd)
 import Utils (sortWith)

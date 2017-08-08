@@ -1,8 +1,8 @@
 module Event.State where
 
-import Event.Types
+import Event.Types (EventId, EventState, Vote(..))
 import Data.Maybe (Maybe(..))
-import Network.RemoteData (RemoteData(Loading))
+import Network.RemoteData (RemoteData(..))
 
 initEventState :: EventId -> EventState
 initEventState eventId =

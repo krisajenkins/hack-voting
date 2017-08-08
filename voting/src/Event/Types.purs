@@ -1,6 +1,5 @@
 module Event.Types where
 
-import Data.Map as Map
 import Control.Monad.Eff.Exception (Error)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
 import Data.Argonaut.Decode.Combinators ((.??))
@@ -10,6 +9,7 @@ import Data.Generic (class Generic, gShow)
 import Data.Lens (Lens', lens', view)
 import Data.Lens.Types (Optic')
 import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (mempty)
 import Data.Newtype (class Newtype, unwrap, wrap)
