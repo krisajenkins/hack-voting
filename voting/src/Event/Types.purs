@@ -216,7 +216,7 @@ _votes = lens' (\(Event event) -> Tuple event.votes (\votes -> Event (event {vot
 _voteError :: Lens' EventState (Maybe Error)
 _voteError = lens' (\eventState -> Tuple eventState.voteError (\voteError -> eventState {voteError = voteError}))
 
-toLens :: forall f. Priority -> Lens' Vote (Maybe OptionId)
+toLens :: Priority -> Lens' Vote (Maybe OptionId)
 toLens First = _first
 toLens Second = _second
 toLens Third = _third
