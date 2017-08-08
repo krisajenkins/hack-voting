@@ -3,11 +3,9 @@ module Utils where
 import Data.Map as Map
 import Data.StrMap as StrMap
 import Control.Coroutine (Consumer, consumer)
-import Control.Monad.State (class MonadState)
 import Data.Argonaut (class DecodeJson, JObject, decodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either)
-import Data.Lens (Lens, assign, use)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (class Newtype, wrap)
@@ -50,15 +48,3 @@ taggedConsumer tagger =
   consumer \msg -> do
     _ <- tagger msg
     pure Nothing
-
-assignM :: forall s a b m. MonadState s m => Lens s s a b -> m b -> m Unit
-assignM l mv = do
-  old <- use l
-  new <- mv
-  assign l new
-
-modifyingM :: forall s a b m. MonadState s m => Lens s s a b -> (a -> m b) -> m Unit
-modifyingM l mf = do
-  old <- use l
-  new <- mf old
-  assign l new
