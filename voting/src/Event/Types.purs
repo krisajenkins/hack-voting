@@ -98,8 +98,8 @@ instance arbitraryVote :: Arbitrary Vote where
 ------------------------------------------------------------
 
 newtype EventId = EventId String
-derive instance newtypeEventId :: Newtype EventId _
 
+derive instance newtypeEventId :: Newtype EventId _
 derive instance genericEventId :: Generic EventId
 derive instance eqEventId :: Eq EventId
 derive instance ordEventId :: Ord EventId
