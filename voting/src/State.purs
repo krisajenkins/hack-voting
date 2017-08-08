@@ -24,7 +24,7 @@ import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
 import Halogen (ComponentDSL, liftAff, raise)
 import Lenses (_auth, _events, toEvent)
 import Network.RemoteData (RemoteData(..), _Success)
-import Prelude (type (~>), discard, bind, pure, show, ($), (<<<), (<>), (>>=), (>>>))
+import Prelude
 import Routes (View(..))
 
 init :: App -> State

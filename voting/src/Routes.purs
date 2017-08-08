@@ -1,7 +1,7 @@
 module Routes where
 
-import Prelude (class Eq, class Show, (*>), (<$), (<$>), (<>))
-import Event.Types
+import Prelude
+import Event.Types (EventId(..))
 import Control.Alternative ((<|>))
 import Data.Generic (class Generic, gShow)
 import Routing.Match (Match)

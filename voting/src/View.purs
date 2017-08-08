@@ -1,6 +1,6 @@
 module View where
 
-import Event.Types
+import Event.Types (EventId, EventState, bestTitle)
 import Data.Map as Map
 import Event.View as Event
 import Bootstrap (alert, btn, col, container, navTags, pullRight, row)
@@ -13,7 +13,7 @@ import Halogen.HTML (ClassName(ClassName), HTML, a, button, div, div_, h1, h2, h
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (classes, disabled, href)
 import Network.RemoteData (RemoteData(..))
-import Prelude (show, ($), (<$>), (<<<))
+import Prelude hiding (div)
 import Routes (Router, View(..))
 import Types (Query(..), State)
 import Firebase as Firebase

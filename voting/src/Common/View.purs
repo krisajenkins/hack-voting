@@ -1,10 +1,10 @@
 module Common.View where
 
-import Halogen.HTML
+import Halogen.HTML (HTML, code_, div, div_, h3_, text)
 import Bootstrap (alert)
 import Control.Monad.Eff.Exception (Error)
 import Halogen.HTML.Properties (class_, classes)
-import Prelude (class Show, show, ($))
+import Prelude hiding (div)
 
 errorView :: forall p i. String -> Error -> HTML p i
 errorView title error =

@@ -1,13 +1,13 @@
 module Lenses where
 
-import Types
+import Types (State)
 import Data.Lens (Lens', Traversal', lens')
 import Data.Lens.Index (ix)
 import Data.Tuple (Tuple(..))
 import Event.Types (Event, EventId, Vote, _event, _votes)
 import Firebase (UID)
 import Network.RemoteData (_Success)
-import Prelude ((<<<))
+import Prelude
 
 _events :: forall a b. Lens' {events :: b | a} b
 _events = lens' (\record -> Tuple record.events (\events -> record {events = events}))

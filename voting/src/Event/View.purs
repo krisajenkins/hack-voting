@@ -2,8 +2,7 @@ module Event.View
        ( root )
        where
 
-import Bootstrap
-
+import Bootstrap (alert, badge, btnGroup, classList, col, empty, listGroup, listGroupItem, pullRight, row, well)
 import CSS (pct, width)
 import Common.View (errorView)
 import Data.Array (sortWith)
@@ -25,7 +24,7 @@ import Halogen.HTML.CSS as CSS
 import Halogen.HTML.Events (onClick)
 import Halogen.HTML.Properties (class_, classes)
 import Network.RemoteData (RemoteData(..))
-import Prelude (const, id, negate, not, (#), ($), (*), (/), (<$>), (<<<), (==), (>>>))
+import Prelude hiding (div)
 import Slamdown as Slamdown
 import Text.Markdown.SlamDown (SlamDown)
 import Text.Markdown.SlamDown.Parser (parseMd)

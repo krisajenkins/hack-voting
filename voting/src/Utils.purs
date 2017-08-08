@@ -3,7 +3,6 @@ module Utils where
 import Data.Map as Map
 import Data.StrMap as StrMap
 import Control.Coroutine (Consumer, consumer)
-import Control.Monad (class Monad)
 import Control.Monad.State (class MonadState)
 import Data.Argonaut (class DecodeJson, JObject, decodeJson)
 import Data.Bifunctor (lmap)
@@ -14,8 +13,7 @@ import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (class Newtype, wrap)
 import Data.StrMap (StrMap)
 import Data.Tuple (Tuple)
-import Data.Unit (Unit)
-import Prelude (class Ord, bind, pure, (<$>))
+import Prelude
 
 -- | Decodes:
 -- |
