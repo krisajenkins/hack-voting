@@ -6,6 +6,7 @@ import Bootstrap
 
 import CSS (pct, width)
 import Common.View (errorView)
+import Data.Array (sortWith)
 import Data.Either (Either(..))
 import Data.Foldable (all, maximum)
 import Data.Identity (Identity)
@@ -28,7 +29,6 @@ import Prelude (const, id, negate, not, (#), ($), (*), (/), (<$>), (<<<), (==), 
 import Slamdown as Slamdown
 import Text.Markdown.SlamDown (SlamDown)
 import Text.Markdown.SlamDown.Parser (parseMd)
-import Utils (sortWith)
 
 root :: forall p. Firebase.User -> EventState -> HTML p EventMsg
 root user state =
