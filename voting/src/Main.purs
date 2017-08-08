@@ -39,14 +39,6 @@ redirects driverQuery (Tuple oldView newView) =
 
 ------------------------------------------------------------
 
-firebaseConfig :: Firebase.Config
-firebaseConfig =
-  { apiKey: "AIzaSyBG5-dI_sIjAC5KyQn5UEL9CLrhXwuiwgA"
-  , authDomain: "voting-e6be5.firebaseapp.com"
-  , databaseURL: "https://voting-e6be5.firebaseio.com"
-  , storageBucket: ""
-  }
-
 firebaseAuthProducer :: forall eff.
   App
   -> Producer
@@ -60,13 +52,16 @@ firebaseAuthProducer firebaseApp = do
 firebaseAuthConsumer
   :: forall eff
    . (Query ~> Aff (HalogenEffects (firebase :: FIREBASE | eff)))
-  -> Consumer (RemoteData Error User)
-       (Aff (HalogenEffects (firebase :: FIREBASE | eff))) Unit
+  -> Consumer
+       (RemoteData Error User)
+       (Aff (HalogenEffects (firebase :: FIREBASE | eff)))
+       Unit
 firebaseAuthConsumer driver =
   taggedConsumer (driver <<< action <<< AuthResponse)
 
 ------------------------------------------------------------
 
+-- TODO What is watch actually doing here?
 watch :: forall a eff.
   Db
   -> (Query ~> Aff (avar :: AVAR, firebase :: FIREBASE, console :: CONSOLE | eff))
@@ -84,7 +79,6 @@ watch firebaseDb driverQuery (WatchEvent eventId) = do
     tagger = EventUpdated >>> EventMsg eventId >>> action >>> driverQuery
 
 ------------------------------------------------------------
-
 root :: forall aff.
   App
   -> Component HTML Query Unit Message (Aff (firebase :: FIREBASE, dom :: DOM, console :: CONSOLE | aff))
@@ -95,7 +89,13 @@ root app = component
   , receiver: const Nothing
   }
 
-------------------------------------------------------------
+firebaseConfig :: Firebase.Config
+firebaseConfig =
+  { apiKey: "AIzaSyBG5-dI_sIjAC5KyQn5UEL9CLrhXwuiwgA"
+  , authDomain: "voting-e6be5.firebaseapp.com"
+  , databaseURL: "https://voting-e6be5.firebaseio.com"
+  , storageBucket: ""
+  }
 
 main :: Eff (HalogenEffects (console :: CONSOLE , firebase :: FIREBASE)) Unit
 main = runHalogenAff do
