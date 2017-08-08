@@ -7,13 +7,11 @@ import Data.Either (Either)
 import Data.Foldable (foldl)
 import Data.Generic (class Generic, gShow)
 import Data.Lens (Lens', lens', view)
-import Data.Lens.Types (Optic')
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), maybe)
 import Data.Monoid (mempty)
 import Data.Newtype (class Newtype, unwrap, wrap)
-import Data.Profunctor.Strong (class Strong)
 import Data.Tuple (Tuple(..))
 import Firebase (UID)
 import Network.RemoteData (RemoteData(..))
@@ -218,7 +216,7 @@ _votes = lens' (\(Event event) -> Tuple event.votes (\votes -> Event (event {vot
 _voteError :: Lens' EventState (Maybe Error)
 _voteError = lens' (\eventState -> Tuple eventState.voteError (\voteError -> eventState {voteError = voteError}))
 
-toLens :: forall f. Strong f => Priority -> Optic' f Vote (Maybe OptionId)
+toLens :: forall f. Priority -> Lens' Vote (Maybe OptionId)
 toLens First = _first
 toLens Second = _second
 toLens Third = _third
