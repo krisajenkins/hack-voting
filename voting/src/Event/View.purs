@@ -60,7 +60,6 @@ eventView user (Success event) =
           ]
       ]
 
-
 optionsView :: forall p. Vote -> Event -> HTML p EventMsg
 optionsView userVote (Event event) =
   div_
@@ -140,6 +139,7 @@ votesView (Event event) =
               else
                 well (voteBar event.options maxCount <$> tallied)
             ]
+
 voteBar ::
   forall p i.
   Map OptionId Option
