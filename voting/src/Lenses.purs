@@ -1,22 +1,22 @@
 module Lenses where
 
-import Types (State)
-import Data.Lens (Lens', Traversal', lens')
+import Prelude
+import Data.Lens (Lens', Traversal')
 import Data.Lens.Index (ix)
-import Data.Tuple (Tuple(..))
+import Data.Lens.Record (prop)
+import Data.Symbol (SProxy(..))
 import Event.Types (Event, EventId, Vote, _event, _votes)
 import Firebase (UID)
 import Network.RemoteData (_Success)
-import Prelude
+import Types (State)
 
 _events :: forall a b. Lens' {events :: b | a} b
-_events = lens' (\record -> Tuple record.events (\events -> record {events = events}))
--- TODO In PureScript 0.11, I believe we could replace this with:
--- _events = prop (SProxy :: SProxy "events")
+_events = prop (SProxy :: SProxy "events")
 
 _auth :: forall a b. Lens' {auth :: b | a} b
-_auth = lens' (\record -> Tuple record.auth (\auth -> record {auth = auth}))
+_auth = prop (SProxy :: SProxy "auth")
 
+-- TODO I wander if these ought to be IndexedTraversals?
 toEvent :: EventId -> Traversal' State Event
 toEvent eventId =
   _events
