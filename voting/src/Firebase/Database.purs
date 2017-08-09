@@ -9,7 +9,7 @@ module Firebase.Database
        )
        where
 
-import Firebase.Core
+import Firebase.Core (App, FIREBASE)
 import Control.Bind (bind)
 import Control.Coroutine (Producer)
 import Control.Coroutine.Aff (produce)
@@ -58,6 +58,7 @@ set :: forall eff.
 set dbRef json = do
   promise <- liftEff $ runFn2 set_ dbRef json
   runPromise promise
+
 onValue :: forall eff.
   DbRef
   -> Producer
