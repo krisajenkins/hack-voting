@@ -8,6 +8,7 @@ initEventState :: EventId -> EventState
 initEventState eventId =
   { id: eventId
   , event: Loading
+    -- TODO Are these errors ever set?
   , eventError: Nothing
   , voteError: Nothing
   , optionError: Nothing
