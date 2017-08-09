@@ -29,9 +29,10 @@ import Network.RemoteData as RemoteData
 import Routes (View(..))
 import Types (Message(..), Query(..), State)
 
-init :: App -> State
-init app =
+init :: App -> String -> State
+init app locationHost =
     { auth: NotAsked
+    , locationHost: locationHost
     , events: Map.empty
     , view: FrontPage
     , app: app

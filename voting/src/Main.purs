@@ -26,6 +26,7 @@ import State as State
 import Types (Message(..), Query(..))
 import Utils (taggedConsumer)
 import View as View
+import Document as Document
 
 routeSignal :: forall eff. (Query ~> Aff eff) -> Aff eff Unit
 routeSignal driverQuery =
@@ -82,9 +83,10 @@ watch firebaseDb driverQuery (WatchEvent eventId) = do
 ------------------------------------------------------------
 root :: forall aff.
   App
+  -> String
   -> Component HTML Query Unit Message (Aff (firebase :: FIREBASE, dom :: DOM, console :: CONSOLE | aff))
-root app = component
-  { initialState: const (State.init app)
+root app locationHost = component
+  { initialState: const (State.init app locationHost)
   , render: View.render pathRouter
   , eval: State.eval
   , receiver: const Nothing
@@ -103,7 +105,8 @@ main = runHalogenAff do
   body <- awaitBody
   firebaseApp <- liftEff $ initializeApp firebaseConfig
   firebaseDb <- liftEff $ Firebase.getDb firebaseApp
-  driver <- runUI (root firebaseApp) unit body
+  locationHost <- liftEff Document.locationHost
+  driver <- runUI (root firebaseApp locationHost) unit body
 
   _ <- forkAff $ runProcess $ connect (firebaseAuthProducer firebaseApp) (firebaseAuthConsumer driver.query)
   _ <- forkAff $ driver.subscribe $ consumer $ watch firebaseDb driver.query

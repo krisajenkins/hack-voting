@@ -20,6 +20,7 @@ data Message
 
 type State =
     { view :: View
+    , locationHost :: String
     , auth :: RemoteData Error Firebase.User
     , events :: Map EventId EventState
     , app :: Firebase.App
