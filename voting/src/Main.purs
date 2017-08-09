@@ -1,10 +1,5 @@
 module Main where
 
-import Prelude
-import Firebase (App, Db, FIREBASE, User, initializeApp, signInAnonymously)
-import Firebase as Firebase
-import State as State
-import View as View
 import Control.Coroutine (Consumer, Producer, connect, consumer, emit, runProcess)
 import Control.Monad.Aff (Aff, forkAff)
 import Control.Monad.Aff.AVar (AVAR)
@@ -16,15 +11,21 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Event.Types (EventMsg(..))
+import Firebase (App, Db, FIREBASE, User, initializeApp, signInAnonymously)
+import Firebase as Firebase
 import Halogen (Component, action, component, lift, liftEff)
 import Halogen.Aff (HalogenEffects, awaitBody, runHalogenAff)
 import Halogen.HTML (HTML)
 import Halogen.VDom.Driver (runUI)
 import Network.RemoteData (RemoteData(..), fromEither)
+import Network.RemoteData as RemoteData
+import Prelude
 import Routes (View, pathRouter, routing)
 import Routing (matchesAff)
+import State as State
 import Types (Message(..), Query(..))
 import Utils (taggedConsumer)
+import View as View
 
 routeSignal :: forall eff. (Query ~> Aff eff) -> Aff eff Unit
 routeSignal driverQuery =
@@ -76,7 +77,7 @@ watch firebaseDb driverQuery (WatchEvent eventId) = do
       firebaseDb
       # Firebase.getDbRef "events"
       # Firebase.getDbRefChild (unwrap eventId)
-    tagger = EventUpdated >>> EventMsg eventId >>> action >>> driverQuery
+    tagger = RemoteData.fromEither >>> EventUpdated >>> EventMsg eventId >>> action >>> driverQuery
 
 ------------------------------------------------------------
 root :: forall aff.

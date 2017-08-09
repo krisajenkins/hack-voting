@@ -154,7 +154,7 @@ priorities = [ First, Second, Third ]
 
 data EventMsg
     = VoteFor Priority (Maybe OptionId)
-    | EventUpdated (Either Error Json)
+    | EventUpdated (RemoteData Error Json)
 
 type EventState =
     { id :: EventId
