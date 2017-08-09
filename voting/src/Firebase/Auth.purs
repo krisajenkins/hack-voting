@@ -1,4 +1,14 @@
-module Firebase.Auth where
+module Firebase.Auth
+       ( getAuth
+       , signInAnonymously
+       , Auth
+       , UID
+       , Email
+       , User
+       , _uid
+       , _email
+       )
+       where
 
 import Prelude
 import Control.Monad.Aff (Aff)
@@ -9,13 +19,11 @@ import Data.Bifunctor (rmap)
 import Data.Either (Either)
 import Data.Foreign (Foreign)
 import Data.Foreign.Lens (prop, string)
-import Data.Lens.Record as Record
 import Data.Generic (class Generic, gShow)
-import Data.Lens (view)
-import Data.Lens.Types (Lens)
+import Data.Lens (Lens', view)
+import Data.Lens.Record as Record
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(..))
-import Firebase.Auth (Auth, Email(..), UID(..), User, getAuth, signInAnonymously_)
 import Firebase.Core (App, FIREBASE)
 import Firebase.Promise (Promise, runPromise)
 
@@ -23,21 +31,12 @@ foreign import data Auth :: Type
 
 foreign import getAuth :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Auth
 
+------------------------------------------------------------
+
 foreign import signInAnonymously_ ::
   forall eff.
   Auth
   -> Eff (firebase :: FIREBASE | eff) (Promise Foreign)
-
-type User =
-  { uid :: UID
-  , email :: Email
-  }
-
-_uid :: forall a b r. Lens { uid :: a | r } { uid :: b | r } a b
-_uid = Record.prop (SProxy :: SProxy "uid")
-
-_email :: forall a b r. Lens { email :: a | r } { email :: b | r } a b
-_email = Record.prop (SProxy :: SProxy "email")
 
 signInAnonymously ::
   forall aff.
@@ -72,3 +71,14 @@ derive instance genericEmail :: Generic Email
 
 instance showEmail :: Show Email where
   show = gShow
+
+type User =
+  { uid :: UID
+  , email :: Email
+  }
+
+_uid :: forall a r. Lens' { uid :: a | r } a
+_uid = Record.prop (SProxy :: SProxy "uid")
+
+_email :: forall a r. Lens' { email :: a | r } a
+_email = Record.prop (SProxy :: SProxy "email")

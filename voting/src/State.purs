@@ -1,9 +1,7 @@
 module State where
 
-import Types (Message(..), Query(..), State)
-import Data.Map as Map
-import Firebase as Firebase
-import Network.RemoteData as RemoteData
+import Prelude
+
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
@@ -17,15 +15,19 @@ import Data.Lens (assign, modifying, preview, set)
 import Data.Lens.At (at)
 import Data.Lens.Index (ix)
 import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Newtype (unwrap)
 import Event.State (initEventState, initialVote)
 import Event.Types (EventId(..), EventMsg(..), EventState, OptionId, Priority, Vote, _event, _voteError, _votes, toLens)
-import Firebase (App, Db, DbRef, FIREBASE, UID(..), getDbRef, getDbRefChild)
+import Firebase (App, Db, DbRef, FIREBASE, UID, getDbRef, getDbRefChild)
+import Firebase as Firebase
 import Halogen (ComponentDSL, liftAff, raise)
 import Lenses (_auth, _events, toEvent)
 import Network.RemoteData (RemoteData(..), _Success)
-import Prelude
+import Network.RemoteData as RemoteData
 import Routes (View(..))
+import Types (Message(..), Query(..), State)
 
 init :: App -> State
 init app =
@@ -81,11 +83,11 @@ eval (EventMsg eventId (EventUpdated response) next) = do
   pure next
 
 voteDbRef :: EventId -> UID -> Db -> DbRef
-voteDbRef (EventId eventId) (UID uid) =
+voteDbRef eventId uid =
   getDbRef "events"
-  >>> getDbRefChild eventId
+  >>> getDbRefChild (unwrap eventId)
   >>> getDbRefChild "votes"
-  >>> getDbRefChild uid
+  >>> getDbRefChild (unwrap uid)
 
 setVote :: Priority -> Maybe OptionId -> Maybe Vote -> Maybe Vote
 setVote priority option =
