@@ -76,9 +76,9 @@ eval (EventMsg eventId (VoteFor priority option) next) = do
       firebaseDb <- liftEff $ Firebase.getDb state.app
       let firebaseRef = voteDbRef eventId uid firebaseDb
       result <- liftAff $ Firebase.set firebaseRef (encodeJson vote)
-      case result of
-        Left err -> assign voteErrorPath (Just err)
-        Right _ -> pure unit
+      assign voteErrorPath $ case result of
+        Left err -> (Just err)
+        Right _ -> Nothing
 
   pure next
 
