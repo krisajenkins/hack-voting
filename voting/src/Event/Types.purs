@@ -3,7 +3,6 @@ module Event.Types where
 import Control.Monad.Eff.Exception (Error)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
 import Data.Argonaut.Decode.Combinators ((.??))
-import Data.Either (Either)
 import Data.Foldable (foldl)
 import Data.Generic (class Generic, gShow)
 import Data.Lens (Lens', lens', view)
@@ -159,9 +158,7 @@ data EventMsg
 type EventState =
     { id :: EventId
     , event :: RemoteData String Event
-    , eventError :: Maybe Error
     , voteError :: Maybe Error
-    , optionError :: Maybe Error
     }
 
 bestTitle :: EventState -> String

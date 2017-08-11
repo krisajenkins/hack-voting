@@ -31,9 +31,7 @@ import Text.Markdown.SlamDown.Parser (parseMd)
 
 root :: forall p. Firebase.User -> EventState -> HTML p EventMsg
 root user state =
-  div_ [ maybe empty (errorView "There was a problem loading this event.") state.eventError
-       , maybe empty (errorView "There was a problem saving your vote.") state.voteError
-       , maybe empty (errorView "There was a problem saving your option.") state.optionError
+  div_ [ maybe empty (errorView "There was a problem saving your vote.") state.voteError
        , eventView user state.event
        ]
 
