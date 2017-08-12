@@ -1,6 +1,5 @@
 module Main where
 
-import Prelude
 import Control.Coroutine (Consumer, Producer, connect, consumer, emit, runProcess)
 import Control.Monad.Aff (Aff, forkAff)
 import Control.Monad.Eff (Eff)
@@ -20,6 +19,7 @@ import Halogen.HTML (HTML)
 import Halogen.VDom.Driver (runUI)
 import Network.RemoteData (RemoteData(..), fromEither)
 import Network.RemoteData as RemoteData
+import Prelude
 import Routes (View, pathRouter, routing)
 import Routing (matchesAff)
 import State as State
