@@ -157,6 +157,8 @@ data EventMsg
 
 type EventState =
     { id :: EventId
+    -- There's an argument for making this string error type some
+    -- union of Firebase.Error and Json-Decode-Failure-String.
     , event :: RemoteData String Event
     , voteError :: Maybe Error
     }
