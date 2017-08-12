@@ -17,6 +17,7 @@ data Query a
 
 data Message
   = WatchEvent EventId
+  | SignInAnonymously
 
 type State =
     { view :: View

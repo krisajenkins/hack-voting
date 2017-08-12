@@ -37,16 +37,27 @@ init app locationHost =
     }
 
 eval :: forall eff. Query ~> ComponentDSL State Query Message (Aff (console :: CONSOLE, firebase :: FIREBASE | eff))
+
 eval (UpdateView view next) = do
   modify (_ { view = view })
   pure next
+
+eval (Authenticate next) = do
+  raise SignInAnonymously
+  pure next
+
 eval (AuthResponse response next) = do
   assign _auth response
   authEvents response [ EventId "languages"
                       , EventId "projects"
                       ]
   pure next
-eval (Authenticate next) = pure next
+
+eval (EventMsg eventId (EventUpdated response) next) = do
+  assign (_events <<< ix eventId <<< _event)
+    (lmap show response >>= (decodeJson >>> RemoteData.fromEither))
+  pure next
+
 eval (EventMsg eventId (VoteFor priority option) next) = do
   liftEff $ log $ "Got a vote: " <> show priority <> " - " <> show option
   state <- get
@@ -80,11 +91,6 @@ eval (EventMsg eventId (VoteFor priority option) next) = do
         Left err -> (Just err)
         Right _ -> Nothing
 
-  pure next
-
-eval (EventMsg eventId (EventUpdated response) next) = do
-  assign (_events <<< ix eventId <<< _event)
-    (lmap show response >>= (decodeJson >>> RemoteData.fromEither))
   pure next
 
 voteDbRef :: EventId -> UID -> Db -> DbRef

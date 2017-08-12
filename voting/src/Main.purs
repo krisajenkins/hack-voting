@@ -1,8 +1,8 @@
 module Main where
 
+import Prelude
 import Control.Coroutine (Consumer, Producer, connect, consumer, emit, runProcess)
 import Control.Monad.Aff (Aff, forkAff)
-import Control.Monad.Aff.AVar (AVAR)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION, Error)
@@ -10,8 +10,9 @@ import DOM (DOM)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
+import Document as Document
 import Event.Types (EventMsg(..))
-import Firebase (App, Db, FIREBASE, User, initializeApp, signInAnonymously)
+import Firebase (App, FIREBASE, User, initializeApp, signInAnonymously)
 import Firebase as Firebase
 import Halogen (Component, action, component, lift, liftEff)
 import Halogen.Aff (HalogenEffects, awaitBody, runHalogenAff)
@@ -19,14 +20,12 @@ import Halogen.HTML (HTML)
 import Halogen.VDom.Driver (runUI)
 import Network.RemoteData (RemoteData(..), fromEither)
 import Network.RemoteData as RemoteData
-import Prelude
 import Routes (View, pathRouter, routing)
 import Routing (matchesAff)
 import State as State
 import Types (Message(..), Query(..))
 import Utils (taggedConsumer)
 import View as View
-import Document as Document
 
 routeSignal :: forall eff. (Query ~> Aff eff) -> Aff eff Unit
 routeSignal driverQuery =
@@ -63,22 +62,27 @@ firebaseAuthConsumer driver =
 
 ------------------------------------------------------------
 
--- TODO What is watch actually doing here?
-watch :: forall a eff.
-  Db
-  -> (Query ~> Aff (avar :: AVAR, firebase :: FIREBASE, console :: CONSOLE | eff))
+watchEventMessages :: forall a eff.
+  App
+  -> (Query ~> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)))
   -> Message
-  -> Aff (avar :: AVAR, firebase :: FIREBASE, console :: CONSOLE | eff) (Maybe a)
-watch firebaseDb driverQuery (WatchEvent eventId) = do
+  -> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)) (Maybe a)
+watchEventMessages firebaseApp driverQuery (WatchEvent eventId) = do
+  firebaseDb <- liftEff $ Firebase.getDb firebaseApp
+  let ref =
+        firebaseDb
+        # Firebase.getDbRef "events"
+        # Firebase.getDbRefChild (unwrap eventId)
   canceller <- forkAff $ runProcess $
     connect (Firebase.onValue ref) (taggedConsumer tagger)
   pure Nothing
   where
-    ref =
-      firebaseDb
-      # Firebase.getDbRef "events"
-      # Firebase.getDbRefChild (unwrap eventId)
     tagger = RemoteData.fromEither >>> EventUpdated >>> EventMsg eventId >>> action >>> driverQuery
+
+watchEventMessages firebaseApp driverQuery SignInAnonymously = do
+  canceller <- forkAff $ runProcess $
+    connect (firebaseAuthProducer firebaseApp) (firebaseAuthConsumer driverQuery)
+  pure Nothing
 
 ------------------------------------------------------------
 root :: forall aff.
@@ -100,16 +104,17 @@ firebaseConfig =
   , storageBucket: ""
   }
 
-main :: Eff (HalogenEffects (console :: CONSOLE , firebase :: FIREBASE)) Unit
+main :: Eff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE)) Unit
 main = runHalogenAff do
   body <- awaitBody
   firebaseApp <- liftEff $ initializeApp firebaseConfig
-  firebaseDb <- liftEff $ Firebase.getDb firebaseApp
   locationHost <- liftEff Document.locationHost
   driver <- runUI (root firebaseApp locationHost) unit body
 
+  -- This could be an initial message from the app.
   _ <- forkAff $ runProcess $ connect (firebaseAuthProducer firebaseApp) (firebaseAuthConsumer driver.query)
-  _ <- forkAff $ driver.subscribe $ consumer $ watch firebaseDb driver.query
+
+  _ <- forkAff $ driver.subscribe $ consumer $ watchEventMessages firebaseApp driver.query
   _ <- forkAff $ routeSignal driver.query
 
   pure unit
