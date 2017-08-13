@@ -28,6 +28,17 @@ btn =
   }
 
 -- TODO Flesh out.
+col ::
+  { xs4 :: ClassName
+  , xs6 :: ClassName
+  , xs12 :: ClassName
+  , sm3 :: ClassName
+  , sm6 :: ClassName
+  , sm9 :: ClassName
+  , md4 :: ClassName
+  , md6 :: ClassName
+  , md12 :: ClassName
+  }
 col =
   { xs4:  ClassName "col-xs-4"
   , xs6:  ClassName "col-xs-6"
