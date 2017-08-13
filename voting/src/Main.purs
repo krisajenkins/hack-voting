@@ -72,8 +72,8 @@ watchEventMessages firebaseApp driverQuery (WatchEvent eventId) = do
   let firebaseDb = Firebase.getDb firebaseApp
   let ref =
         firebaseDb
-        # Firebase.getDbRef "events"
-        # Firebase.getDbRefChild (unwrap eventId)
+        # Firebase.getRef "events"
+        # Firebase.getRef (unwrap eventId)
   canceller <- forkAff $ runProcess $
     connect (Firebase.onValue ref) (taggedConsumer tagger)
   pure Nothing

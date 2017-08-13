@@ -2,8 +2,8 @@ module Firebase.Database
        ( Db
        , DbRef
        , getDb
-       , getDbRef
-       , getDbRefChild
+       , class HasRef
+       , getRef
        , onValue
        , set
        )
@@ -33,11 +33,14 @@ foreign import getDb :: forall eff. App -> Db
 foreign import getDbRef_ :: Fn2 String Db DbRef
 foreign import getDbRefChild_ :: Fn2 String DbRef DbRef
 
-getDbRef :: String -> Db -> DbRef
-getDbRef = runFn2 getDbRef_
+class HasRef a where
+  getRef :: String -> a -> DbRef
 
-getDbRefChild :: String -> DbRef -> DbRef
-getDbRefChild = runFn2 getDbRefChild_
+instance hasRefDb :: HasRef Db where
+  getRef = runFn2 getDbRef_
+
+instance hasRefDbRef :: HasRef DbRef where
+  getRef = runFn2 getDbRefChild_
 
 foreign import on_ ::
   forall eff.

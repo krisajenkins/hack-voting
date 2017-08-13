@@ -18,7 +18,7 @@ import Data.Newtype (unwrap)
 import Data.Traversable (traverse_)
 import Event.State (initEventState, initialVote)
 import Event.Types (EventId(..), EventMsg(..), OptionId, Priority, Vote, _event, _voteError, _votes, toLens)
-import Firebase (App, Db, DbRef, FIREBASE, UID, getDbRef, getDbRefChild)
+import Firebase (App, Db, DbRef, FIREBASE, UID, getRef)
 import Firebase as Firebase
 import Halogen (ComponentDSL, HalogenM, liftAff, raise)
 import Lenses (_auth, _events, toEvent)
@@ -95,10 +95,10 @@ eval (EventMsg eventId (VoteFor priority option) next) = do
 
 voteDbRef :: EventId -> UID -> Db -> DbRef
 voteDbRef eventId uid =
-  getDbRef "events"
-  >>> getDbRefChild (unwrap eventId)
-  >>> getDbRefChild "votes"
-  >>> getDbRefChild (unwrap uid)
+  getRef "events"
+  >>> getRef (unwrap eventId)
+  >>> getRef "votes"
+  >>> getRef (unwrap uid)
 
 setVote :: Priority -> Maybe OptionId -> Maybe Vote -> Maybe Vote
 setVote priority option =
