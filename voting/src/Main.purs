@@ -5,6 +5,7 @@ import Control.Monad.Aff (Aff, forkAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION, Error)
+import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import DOM (DOM)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
@@ -118,3 +119,6 @@ main = runHalogenAff do
   _ <- forkAff $ routeSignal driver.query
 
   pure unit
+
+onLoad :: Unit
+onLoad = unsafePerformEff main

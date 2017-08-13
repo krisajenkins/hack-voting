@@ -1,0 +1,36 @@
+@blue: #5bc0de;
+@green: #5bde6a;
+@border-green: darken(@green, 20%);
+
+header {
+    color: white;
+    background-color: @blue;
+    .btn {
+        margin: 20px 0;
+    }
+}
+
+.hostname {
+    border-bottom: solid 1px white;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.alert {
+    margin: 20px 0;
+}
+
+.voting-feedback {
+    min-height: 100px;
+}
+
+.vote {
+    .bar {
+        margin: 15px 0;
+        padding: 10px;
+        background-color: @green;
+        border: solid 2px @border-green;
+        border-radius: 10px;
+        transition: width 200ms;
+    }
+}
