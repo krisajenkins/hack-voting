@@ -112,7 +112,7 @@ main = runHalogenAff do
   locationHost <- liftEff Document.locationHost
   driver <- runUI (root firebaseApp locationHost) unit body
 
-  -- This could be an initial message from the app.
+  -- This could be an initial message from the app, perhaps?
   _ <- forkAff $ runProcess $ connect (firebaseAuthProducer firebaseApp) (firebaseAuthConsumer driver.query)
 
   _ <- forkAff $ driver.subscribe $ consumer $ watchEventMessages firebaseApp driver.query
