@@ -84,7 +84,7 @@ eval (EventMsg eventId (VoteFor priority option) next) = do
       assign voteErrorPath Nothing
 
       -- Send the vote to Firebase, recording the result.
-      firebaseDb <- liftEff $ Firebase.getDb state.app
+      let firebaseDb = Firebase.getDb state.app
       let firebaseRef = voteDbRef eventId uid firebaseDb
       result <- liftAff $ Firebase.set firebaseRef (encodeJson vote)
       assign voteErrorPath $ case result of

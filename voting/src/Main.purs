@@ -69,7 +69,7 @@ watchEventMessages :: forall a eff.
   -> Message
   -> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)) (Maybe a)
 watchEventMessages firebaseApp driverQuery (WatchEvent eventId) = do
-  firebaseDb <- liftEff $ Firebase.getDb firebaseApp
+  let firebaseDb = Firebase.getDb firebaseApp
   let ref =
         firebaseDb
         # Firebase.getDbRef "events"

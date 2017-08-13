@@ -2,12 +2,8 @@
 /*global firebase*/
 'use strict';
 
-// We don't actually use the app argument, but requiring it is a way
-// to require that the app has been initialised.
-exports.getDb = function (appIgnored) {
-    return function () {
-        return firebase.database();
-    };
+exports.getDb = function (app) {
+  return firebase.database(app);
 };
 
 exports.getDbRef_ = function (name, db) {

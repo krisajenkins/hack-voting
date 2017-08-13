@@ -28,7 +28,7 @@ import Firebase.Promise (Promise, runPromise)
 foreign import data Db :: Type
 foreign import data DbRef :: Type
 foreign import data Ref :: Type
-foreign import getDb :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Db
+foreign import getDb :: forall eff. App -> Db
 
 foreign import getDbRef_ :: Fn2 String Db DbRef
 foreign import getDbRefChild_ :: Fn2 String DbRef DbRef

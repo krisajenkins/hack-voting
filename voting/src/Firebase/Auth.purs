@@ -29,7 +29,7 @@ import Firebase.Promise (Promise, runPromise)
 
 foreign import data Auth :: Type
 
-foreign import getAuth :: forall eff. App -> Eff (firebase :: FIREBASE | eff) Auth
+foreign import getAuth :: forall eff. App -> Auth
 
 ------------------------------------------------------------
 
@@ -43,8 +43,7 @@ signInAnonymously ::
   App -> Aff (firebase :: FIREBASE | aff) (Either Error User)
 signInAnonymously app = do
   promise <- liftEff $ do
-    auth <- getAuth app
-    signInAnonymously_ auth
+    signInAnonymously_ (getAuth app)
   rmap asUser <$> runPromise promise
   where
     asUser :: Foreign -> User

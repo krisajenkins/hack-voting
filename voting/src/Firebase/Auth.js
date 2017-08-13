@@ -2,12 +2,8 @@
 /*global firebase*/
 'use strict';
 
-// We don't actually use the app argument, but requiring it is a way
-// to require that the app has been initialised.
-exports.getAuth = function (appIgnored) {
-    return function () {
-        return firebase.auth();
-    };
+exports.getAuth = function (app) {
+    return firebase.auth(app);
 };
 
 exports.signInAnonymously_ = function (auth) {
