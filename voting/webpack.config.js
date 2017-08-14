@@ -22,9 +22,9 @@ module.exports = {
   devtool: 'eval-source-map',
 
   devServer: {
-    contentBase: '.',
-    port: 4008,
-    stats: 'errors-only'
+    contentBase: path.join(__dirname, "dist"),
+    compress: true,
+    port: 8000
   },
 
   entry: './entry.js',

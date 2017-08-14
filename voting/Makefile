@@ -6,4 +6,10 @@ all: webpack
 webpack: FORCE
 	webpack
 
+prod: FORCE
+	webpack --optimize-minimize
+
+dev: FORCE
+	webpack-dev-server
+
 FORCE:
