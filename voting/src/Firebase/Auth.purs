@@ -11,17 +11,24 @@ module Firebase.Auth
        where
 
 import Prelude
+
 import Control.Monad.Aff (Aff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Exception (Error)
-import Data.Bifunctor (rmap)
-import Data.Either (Either)
+import Control.Monad.Eff.Exception (Error, error)
+import Control.Monad.Except (runExcept)
+import Data.Bifunctor (lmap)
+import Data.Either (Either(..))
 import Data.Foreign (Foreign)
-import Data.Foreign.Lens (prop, string)
-import Data.Generic (class Generic, gShow)
-import Data.Lens (Lens', view)
+import Data.Foreign.Class (class Decode, decode)
+import Data.Foreign.Generic (defaultOptions, genericDecode)
+import Data.Foreign.NullOrUndefined (NullOrUndefined)
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
+import Data.Lens (Lens')
+import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record as Record
+import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy(..))
 import Firebase.Core (App, FIREBASE)
@@ -44,40 +51,50 @@ signInAnonymously ::
 signInAnonymously app = do
   promise <- liftEff $ do
     signInAnonymously_ (getAuth app)
-  rmap asUser <$> runPromise promise
-  where
-    asUser :: Foreign -> User
-    asUser = do
-      uid <- UID <$> view (prop "uid" <<< string)
-      email <- Email <$> view (prop "email" <<< string)
-      pure { uid, email }
+  value <- runPromise promise
+  pure $ case value of
+    Left err -> Left err
+    Right foreignValue -> lmap (error <<< show) ((runExcept <<< decode) foreignValue)
 
 ------------------------------------------------------------
 
 newtype UID = UID String
 
-derive instance genericUID :: Generic UID
+derive instance genericUID :: Generic UID _
 derive instance eqUID :: Eq UID
 derive instance ordUID :: Ord UID
 derive instance newtypeUID :: Newtype UID _
 
 instance showUID :: Show UID where
-  show = gShow
+  show = genericShow
+
+instance decodeUID :: Decode UID where
+  decode = genericDecode (defaultOptions { unwrapSingleConstructors = true })
 
 newtype Email = Email String
 
-derive instance genericEmail :: Generic Email
+derive instance genericEmail :: Generic Email _
+derive instance newtypeEmail :: Newtype Email _
 
 instance showEmail :: Show Email where
-  show = gShow
+  show = genericShow
 
-type User =
+instance decodeEmail :: Decode Email where
+  decode = genericDecode (defaultOptions { unwrapSingleConstructors = true })
+
+newtype User = User
   { uid :: UID
-  , email :: Email
+  , email :: NullOrUndefined Email
   }
 
-_uid :: forall a r. Lens' { uid :: a | r } a
-_uid = Record.prop (SProxy :: SProxy "uid")
+derive instance genericUser :: Generic User _
+derive instance newtypeUser :: Newtype User _
 
-_email :: forall a r. Lens' { email :: a | r } a
-_email = Record.prop (SProxy :: SProxy "email")
+instance decodeUser :: Decode User where
+  decode = genericDecode (defaultOptions { unwrapSingleConstructors = true })
+
+_uid :: forall r a. Lens' User UID
+_uid = _Newtype <<< Record.prop (SProxy :: SProxy "uid")
+
+_email :: forall r a. Lens' User (Maybe Email)
+_email = _Newtype <<< Record.prop (SProxy :: SProxy "email") <<< _Newtype

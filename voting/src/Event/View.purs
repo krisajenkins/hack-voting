@@ -10,7 +10,7 @@ import Data.Either (Either(..))
 import Data.Foldable (all, maximum)
 import Data.Identity (Identity)
 import Data.Int (toNumber)
-import Data.Lens (view, viewOn)
+import Data.Lens (view, viewOn, (^.))
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), isJust, maybe)
@@ -18,6 +18,7 @@ import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), snd)
 import Event.State (initialVote)
 import Event.Types (Event(..), EventMsg(..), EventState, Option(..), OptionId, Priority(..), Vote, priorities, tally, toLens)
+import Firebase (_uid)
 import Firebase as Firebase
 import Halogen.HTML (ClassName(..), HTML, button, div, div_, h2_, h3_, h4_, i_, p_, span_, sup_, text)
 import Halogen.HTML.CSS as CSS
@@ -42,7 +43,7 @@ eventView _ NotAsked = h2_ [ text "Initialising." ]
 eventView user (Success event) =
   let
     userVote =
-      Map.lookup user.uid (unwrap event).votes
+      Map.lookup (view _uid user) (unwrap event).votes
         # maybe initialVote id
   in
     div_

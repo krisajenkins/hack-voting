@@ -4,7 +4,8 @@ import Control.Monad.Eff.Exception (Error)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, decodeJson, encodeJson, jsonEmptyObject, (.?), (:=), (~>))
 import Data.Argonaut.Decode.Combinators ((.??))
 import Data.Foldable (foldl)
-import Data.Generic (class Generic, gShow)
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
 import Data.Lens (Lens', lens', view)
 import Data.Map (Map)
 import Data.Map as Map
@@ -20,13 +21,13 @@ import Utils (getFieldNullable, keyMap)
 
 newtype OptionId = OptionId String
 
-derive instance genericOptionId :: Generic OptionId
+derive instance genericOptionId :: Generic OptionId _
 derive instance eqOptionId :: Eq OptionId
 derive instance ordOptionId :: Ord OptionId
 derive instance newtypeOptionId :: Newtype OptionId _
 
 instance showOptionId :: Show OptionId where
-  show = gShow
+  show = genericShow
 
 instance arbitraryOptionId :: Arbitrary OptionId where
   arbitrary = OptionId <$> arbitrary
@@ -43,13 +44,13 @@ newtype Option = Option
     , description :: Maybe String
     }
 
-derive instance genericOption :: Generic Option
+derive instance genericOption :: Generic Option _
 derive instance eqOption :: Eq Option
 derive instance ordOption :: Ord Option
 derive instance newtypeOption :: Newtype Option _
 
 instance showOption :: Show Option where
-  show = gShow
+  show = genericShow
 
 instance decodeJsonOption :: DecodeJson Option where
     decodeJson json = do
@@ -66,11 +67,11 @@ newtype Vote = Vote
     , third :: Maybe OptionId
     }
 
+derive instance genericVote :: Generic Vote _
 derive instance eqVote :: Eq Vote
-derive instance genericVote :: Generic Vote
 
 instance showVote :: Show Vote where
-    show = gShow
+    show = genericShow
 
 instance decodeJsonVote :: DecodeJson Vote where
     decodeJson json = do
@@ -98,13 +99,13 @@ instance arbitraryVote :: Arbitrary Vote where
 
 newtype EventId = EventId String
 
+derive instance genericEventId :: Generic EventId _
 derive instance newtypeEventId :: Newtype EventId _
-derive instance genericEventId :: Generic EventId
 derive instance eqEventId :: Eq EventId
 derive instance ordEventId :: Ord EventId
 
 instance showEventId :: Show EventId where
-  show = gShow
+  show = genericShow
 
 ------------------------------------------------------------
 
@@ -138,12 +139,12 @@ data Priority
     | Second
     | Third
 
-derive instance genericPriority :: Generic Priority
+derive instance genericPriority :: Generic Priority _
 derive instance eqPriority :: Eq Priority
 derive instance ordPriority :: Ord Priority
 
 instance showPriority :: Show Priority where
-  show = gShow
+  show = genericShow
 
 -- TODO Can we infer this from Bounded or Enum?
 priorities :: Array Priority

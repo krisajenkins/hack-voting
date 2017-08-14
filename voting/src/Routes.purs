@@ -1,9 +1,11 @@
 module Routes where
 
 import Prelude
-import Event.Types (EventId(..))
+
 import Control.Alternative ((<|>))
-import Data.Generic (class Generic, gShow)
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
+import Event.Types (EventId(..))
 import Routing.Match (Match)
 import Routing.Match.Class (lit, str)
 
@@ -13,10 +15,10 @@ data View
     | NotFound String
 
 derive instance viewEq :: Eq View
-derive instance viewGeneric :: Generic View
+derive instance viewGeneric :: Generic View _
 
 instance viewShow :: Show View where
-  show = gShow
+  show = genericShow
 
 routing :: Match View
 routing =
