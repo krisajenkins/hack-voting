@@ -42,8 +42,8 @@ eval (UpdateView view next) = do
   modify (_ { view = view })
   pure next
 
-eval (Authenticate next) = do
-  raise SignInAnonymously
+eval (Authenticate loginType next) = do
+  raise (SignIn loginType)
   pure next
 
 eval (AuthResponse response next) = do

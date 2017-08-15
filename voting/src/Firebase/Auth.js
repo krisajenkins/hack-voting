@@ -2,12 +2,28 @@
 /*global firebase*/
 'use strict';
 
-exports.getAuth = function (app) {
-  return firebase.auth(app);
+exports.getAuthService = function (app) {
+  return app.auth();
 };
 
-exports.signInAnonymously_ = function (auth) {
+exports.signInAnonymously_ = function (authService) {
   return function () {
-    return auth.signInAnonymously();
+    return authService.signInAnonymously();
   };
+};
+
+exports.signInWithPopup_ = function (providerInterface) {
+  return function (popupInterface) {
+    return function (authService) {
+      return function (provider) {
+        return function () {
+          return authService.signInWithPopup(provider);
+        };
+      };
+    };
+  };
+};
+
+exports.makeGithubAuthProvider = function () {
+  return new firebase.auth.GithubAuthProvider();
 };

@@ -1,5 +1,4 @@
 /*eslint-env node*/
-/*global firebase*/
 'use strict';
 
 exports.andCatch = function (promise, callback) {

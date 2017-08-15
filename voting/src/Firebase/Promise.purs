@@ -1,16 +1,23 @@
 module Firebase.Promise
        ( Promise
        , runPromise
+       , decodePromise
        )
        where
 
-import Control.Bind (pure, discard)
+import Control.Bind (pure, bind, discard)
 import Control.Category ((<<<))
 import Control.Monad.Aff (Aff, attempt, makeAff)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception (Error)
-import Data.Either (Either)
+import Control.Monad.Eff.Exception (Error, error)
+import Control.Monad.Except (runExcept)
+import Data.Bifunctor (lmap)
+import Data.Either (Either(..))
+import Data.Foreign (Foreign)
+import Data.Foreign.Class (class Decode, decode)
+import Data.Function (($))
 import Data.Function.Uncurried (Fn2, runFn2)
+import Data.Show (show)
 import Data.Unit (Unit, unit)
 import Firebase.Core (FIREBASE)
 
@@ -44,3 +51,10 @@ foreign import andCatch ::
     (Promise a)
     (Error -> Eff (firebase :: FIREBASE | eff) Unit)
     (Eff (firebase :: FIREBASE | eff) Unit)
+
+decodePromise :: forall eff a. Decode a => Promise Foreign -> Aff (firebase :: FIREBASE | eff) (Either Error a)
+decodePromise promise = do
+  value <- runPromise promise
+  pure $ case value of
+    Left err -> Left err
+    Right foreignValue -> lmap (error <<< show) ((runExcept <<< decode) foreignValue)

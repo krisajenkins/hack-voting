@@ -1,9 +1,8 @@
 /*eslint-env node*/
-/*global firebase*/
 'use strict';
 
 exports.getDb = function (app) {
-  return firebase.database(app);
+  return app.database();
 };
 
 exports.getDbRef_ = function (name, db) {

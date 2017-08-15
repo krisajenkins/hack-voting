@@ -1,7 +1,6 @@
 module Routes where
 
 import Prelude
-
 import Control.Alternative ((<|>))
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)

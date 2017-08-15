@@ -1,22 +1,26 @@
 module View where
 
-import Event.Types (EventId, EventState, bestTitle)
-import Data.Map as Map
-import Event.View as Event
 import Bootstrap (alert, btn, col, container, navTags, pullRight, row)
 import Control.Monad.Eff.Exception (Error)
 import Data.Array (fromFoldable)
+import Data.Lens (preview, view)
+import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Map (Map)
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.String as String
+import Event.Types (EventId, EventState, bestTitle)
+import Event.View as Event
+import Firebase (_displayName, _uid)
+import Firebase as Firebase
 import Halogen (ComponentHTML, action)
-import Halogen.HTML (ClassName(ClassName), HTML, a, button, div, div_, h1, h2, h2_, h3_, h4_, header_, i_, li_, text, ul)
+import Halogen.HTML (ClassName(ClassName), HTML, a, button, div, div_, h1, h2, h2_, h3_, h4_, header_, i_, li_, span_, text, ul)
 import Halogen.HTML.Events (input_, onClick)
 import Halogen.HTML.Properties (classes, disabled, href)
 import Network.RemoteData (RemoteData(..))
 import Prelude hiding (div)
 import Routes (Router, View(..))
 import Types (Query(..), State)
-import Firebase as Firebase
 
 render :: Router View -> State -> ComponentHTML Query
 render router state =
@@ -26,16 +30,10 @@ render router state =
               [ h1 [ classes [ ClassName "hostname" ] ]
                 [ text state.locationHost ]
               , row
-                  [ div [ classes [ col.xs12, col.sm9 ] ]
+                  [ div [ classes [ col.xs12, col.sm8 ] ]
                       [ h3_ [ text "Vote-o-Matic" ] ]
-                  , div [ classes [ col.xs12, col.sm3 ] ]
-                      [ button
-                          [ classes [ btn.primary, btn.block ]
-                          , onClick $ input_ Authenticate
-                          , disabled (canAuthenticate state.auth)
-                          ]
-                          [ text "Log In" ]
-                      ]
+                  , div [ classes [ col.xs12, col.sm4 ] ]
+                      [ loginOutButtons state.auth ]
                   ]
               ]
           ]
@@ -59,12 +57,42 @@ render router state =
          ]
     ]
 
+loginOutButtons :: forall p. RemoteData Error Firebase.User -> HTML p (Query Unit)
+loginOutButtons auth =
+  case auth of
+    Success user -> h3_ [ text "Logged in as: "
+                        , text (displayUser user)
+                        ]
+    Failure _ -> span_ [] -- The error is displayed elsewhere.
+    NotAsked -> loginButtons false
+    Loading -> loginButtons true
 
-canAuthenticate :: RemoteData Error Firebase.User -> Boolean
-canAuthenticate Loading = true
-canAuthenticate (Success _) = true
-canAuthenticate (Failure _) = false
-canAuthenticate NotAsked = false
+loginButtons :: forall p. Boolean -> HTML p (Query Unit)
+loginButtons buttonsDisabled =
+  row
+    [ div [ classes [ col.xs6 ] ]
+        [ button
+            [ classes [ btn.primary, btn.block ]
+            , onClick $ input_ (Authenticate Firebase.Anonymous)
+            , disabled buttonsDisabled
+            ]
+            [ text "Login : Anonymous" ]
+        ]
+    , div [ classes [ col.xs6 ] ]
+        [ button
+            [ classes [ btn.primary, btn.block ]
+            , onClick $ input_ (Authenticate Firebase.Github)
+            , disabled buttonsDisabled
+            ]
+            [ text "Login : Github" ]
+        ]
+    ]
+
+cannotLogin :: RemoteData Error Firebase.User -> Boolean
+cannotLogin Loading = true
+cannotLogin (Success _) = true
+cannotLogin (Failure _) = false
+cannotLogin NotAsked = false
 
 eventLinks :: forall p i. Router View -> Map EventId EventState -> HTML p i
 eventLinks router events =
@@ -93,3 +121,9 @@ eventView _ Nothing = notFoundView
 notFoundView :: forall p i. HTML p i
 notFoundView =
   h2_ [ text "404 - Not Found" ]
+
+displayUser :: Firebase.User -> String
+displayUser user =
+   case view _displayName user of
+     Just name -> name
+     Nothing -> (String.take 5 (view (_uid <<< _Newtype) user)) <> "..."

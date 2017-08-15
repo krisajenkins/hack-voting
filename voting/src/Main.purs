@@ -7,12 +7,13 @@ import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (EXCEPTION, Error)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import DOM (DOM)
+import Data.Lens (view)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Document as Document
 import Event.Types (EventMsg(..))
-import Firebase (App, FIREBASE, User, initializeApp, signInAnonymously)
+import Firebase (App, FIREBASE, User, signInAnonymously, signInWithPopup, makeGithubAuthProvider)
 import Firebase as Firebase
 import Halogen (Component, action, component, lift, liftEff)
 import Halogen.Aff (HalogenEffects, awaitBody, runHalogenAff)
@@ -42,13 +43,17 @@ redirects driverQuery (Tuple oldView newView) =
 ------------------------------------------------------------
 
 firebaseAuthProducer :: forall eff.
-  App
+  Firebase.AuthService
+  -> Firebase.GithubAuthProvider
+  -> Firebase.LoginType
   -> Producer
        (RemoteData Error User)
        (Aff (firebase :: FIREBASE, console :: CONSOLE, exception :: EXCEPTION | eff)) Unit
-firebaseAuthProducer firebaseApp = do
+firebaseAuthProducer firebaseAuthService githubAuthProvider loginType = do
   emit Loading
-  result :: RemoteData Error User <- lift $ fromEither <$> signInAnonymously firebaseApp
+  result <- lift $ fromEither <$> (case loginType of
+                                      Firebase.Anonymous -> signInAnonymously firebaseAuthService
+                                      Firebase.Github -> map (view Firebase._user) <$> signInWithPopup firebaseAuthService githubAuthProvider)
   emit result
 
 firebaseAuthConsumer
@@ -65,13 +70,14 @@ firebaseAuthConsumer driver =
 
 watchEventMessages :: forall a eff.
   App
+  -> Firebase.GithubAuthProvider
   -> (Query ~> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)))
   -> Message
   -> Aff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE | eff)) (Maybe a)
-watchEventMessages firebaseApp driverQuery (WatchEvent eventId) = do
-  let firebaseDb = Firebase.getDb firebaseApp
+watchEventMessages firebaseApp _ driverQuery (WatchEvent eventId) = do
   let ref =
-        firebaseDb
+        firebaseApp
+        # Firebase.getDb
         # Firebase.getRef "events"
         # Firebase.getRef (unwrap eventId)
   canceller <- forkAff $ runProcess $
@@ -80,9 +86,9 @@ watchEventMessages firebaseApp driverQuery (WatchEvent eventId) = do
   where
     tagger = RemoteData.fromEither >>> EventUpdated >>> EventMsg eventId >>> action >>> driverQuery
 
-watchEventMessages firebaseApp driverQuery SignInAnonymously = do
+watchEventMessages firebaseApp githubAuthProvider driverQuery (SignIn loginType) = do
   canceller <- forkAff $ runProcess $
-    connect (firebaseAuthProducer firebaseApp) (firebaseAuthConsumer driverQuery)
+    connect (firebaseAuthProducer (Firebase.getAuthService firebaseApp) githubAuthProvider loginType) (firebaseAuthConsumer driverQuery)
   pure Nothing
 
 ------------------------------------------------------------
@@ -108,14 +114,15 @@ firebaseConfig =
 main :: Eff (HalogenEffects (console :: CONSOLE, firebase :: FIREBASE)) Unit
 main = runHalogenAff do
   body <- awaitBody
-  firebaseApp <- liftEff $ initializeApp firebaseConfig
+  firebaseApp <- liftEff $ Firebase.initializeApp firebaseConfig
   locationHost <- liftEff Document.locationHost
   driver <- runUI (root firebaseApp locationHost) unit body
+  githubAuthProvider <- liftEff $ makeGithubAuthProvider
 
   -- This could be an initial message from the app, perhaps?
-  _ <- forkAff $ runProcess $ connect (firebaseAuthProducer firebaseApp) (firebaseAuthConsumer driver.query)
+  -- _ <- forkAff $ runProcess $ connect (firebaseAuthProducer firebaseApp) (firebaseAuthConsumer driver.query)
 
-  _ <- forkAff $ driver.subscribe $ consumer $ watchEventMessages firebaseApp driver.query
+  _ <- forkAff $ driver.subscribe $ consumer $ watchEventMessages firebaseApp githubAuthProvider driver.query
   _ <- forkAff $ routeSignal driver.query
 
   pure unit

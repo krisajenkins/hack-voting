@@ -10,7 +10,7 @@ import Data.Either (Either(..))
 import Data.Foldable (all, maximum)
 import Data.Identity (Identity)
 import Data.Int (toNumber)
-import Data.Lens (view, viewOn, (^.))
+import Data.Lens (view, viewOn)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), isJust, maybe)
@@ -42,8 +42,10 @@ eventView _ Loading = h2_ [ i_ [ text "Waiting for event data..." ] ]
 eventView _ NotAsked = h2_ [ text "Initialising." ]
 eventView user (Success event) =
   let
+    -- TODO This whole thing could be a lens, couldn't it?
     userVote =
-      Map.lookup (view _uid user) (unwrap event).votes
+      (unwrap event).votes
+        # Map.lookup (view _uid user)
         # maybe initialVote id
   in
     div_

@@ -32,8 +32,11 @@ col ::
   { xs4 :: ClassName
   , xs6 :: ClassName
   , xs12 :: ClassName
+  , sm2 :: ClassName
   , sm3 :: ClassName
+  , sm4 :: ClassName
   , sm6 :: ClassName
+  , sm8 :: ClassName
   , sm9 :: ClassName
   , md4 :: ClassName
   , md6 :: ClassName
@@ -43,8 +46,11 @@ col =
   { xs4:  ClassName "col-xs-4"
   , xs6:  ClassName "col-xs-6"
   , xs12: ClassName "col-xs-12"
+  , sm2: ClassName "col-sm-2"
   , sm3: ClassName "col-sm-3"
+  , sm4: ClassName "col-sm-4"
   , sm6: ClassName "col-sm-6"
+  , sm8: ClassName "col-sm-8"
   , sm9: ClassName "col-sm-9"
   , md4:  ClassName "col-md-4"
   , md6:  ClassName "col-md-6"

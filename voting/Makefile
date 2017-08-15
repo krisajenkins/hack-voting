@@ -12,4 +12,7 @@ prod: FORCE
 dev: FORCE
 	webpack-dev-server
 
+test: FORCE
+	pulp --before clear test
+
 FORCE:
