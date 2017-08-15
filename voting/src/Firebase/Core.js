@@ -3,7 +3,7 @@
 'use strict';
 
 exports.initializeApp = function (config) {
-    return function () {
-        return firebase.initializeApp(config);
-    };
+  return function () {
+    return firebase.initializeApp(config);
+  };
 };
